@@ -22,7 +22,7 @@ from sneaksbid.views import HomeView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
-#path('signin/', views.signin, name='signin'),
+    path('signin/', views.signin, name='signin'),
     path('signout', views.signout, name='signout'),
     path('signup/', views.signup, name='signup'),
     path('activate/<uidb64>/<token>', views.activate, name='activate'),
