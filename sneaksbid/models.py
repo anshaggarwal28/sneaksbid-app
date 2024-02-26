@@ -9,6 +9,7 @@ class Item(models.Model):
     description_long = models.TextField()
     image = models.ImageField()
     is_active = models.BooleanField(default=True)
+    available = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title
