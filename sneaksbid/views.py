@@ -15,6 +15,7 @@ from .tokens import generate_token
 from decimal import Decimal
 from django.conf import settings
 from .forms import SignUpForm
+from .forms import SignInForm
 
 
 
@@ -31,21 +32,23 @@ class HomeView(ListView):
 
 def signin(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        pass1 = request.POST['pass1']
+        form = SignInForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            pass1 = form.cleaned_data['pass1']
 
-        user = authenticate(username=username, password=pass1)
-
-        if user is not None:
-            login(request, user)
-            fname = user.first_name
-            # messages.success(request, "Logged In Sucessfully!!")
-            return render(request, "authentication/index.html", {"fname": fname})
-        else:
-            messages.error(request, "Bad Credentials!!")
-            return redirect('home')
-
-    return render(request, "authentication/signin.html")
+            user = authenticate(username=username, password=pass1)
+            if user is not None:
+                login(request, user)
+                fname = user.first_name
+                # messages.success(request, "Logged In Successfully!!")
+                return render(request, "authentication/index.html", {"fname": fname})
+            else:
+                messages.error(request, "Bad Credentials!!")
+                return redirect('home')
+    else:
+        form = SignInForm()
+    return render(request, "authentication/signin.html",{'form':form})
 
 
 def signup(request):
