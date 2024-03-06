@@ -1,8 +1,6 @@
-from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
-
-from sneaksbid.models import Item
+from sneaksbid.models import Item, Bid
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -13,7 +11,11 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth import authenticate, login, logout
-from . tokens import generate_token
+from .tokens import generate_token
+from decimal import Decimal
+from django.conf import settings
+from .forms import SignUpForm
+
 
 
 # Create your views here.
@@ -25,6 +27,7 @@ class HomeView(ListView):
 
     def get_queryset(self):
         return Item.objects.all()
+
 
 def signin(request):
     if request.method == 'POST':
@@ -43,17 +46,7 @@ def signin(request):
             return redirect('home')
 
     return render(request, "authentication/signin.html")
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.core.mail import send_mail, EmailMessage
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from .tokens import generate_token
-from .forms import SignUpForm
-from django.contrib.sites.shortcuts import get_current_site
+
 
 def signup(request):
     if request.method == 'POST':
@@ -138,8 +131,33 @@ def activate(request, uidb64, token):
         return render(request, 'activation_failed.html')
 
 
-
 def signout(request):
     logout(request)
     messages.success(request, "Logged Out Successfully!!")
     return redirect('home')
+
+
+def item_detail(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    return render(request, './sneaksbid/item_detail.html', {'item': item})
+
+
+def place_bid(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    if not item.is_auction_active:
+        messages.error(request, "The auction is not currently active.")
+        return redirect('item_detail', item_id=item.id)
+
+    if request.method == 'POST':
+        bid_amount = Decimal(request.POST.get('bid_amount', 0))
+        last_bid = item.bids.last()
+        if last_bid and bid_amount <= last_bid.bid_amount:
+            messages.error(request, "Your bid must be higher than the current highest bid.")
+            return redirect('item_detail', item_id=item.id)
+        elif bid_amount <= item.base_price:
+            messages.error(request, "Your bid must be higher than the base price.")
+            return redirect('item_detail', item_id=item.id)
+
+        Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
+        messages.success(request, "Bid placed successfully.")
+    return redirect('item_detail', item_id=item.id)

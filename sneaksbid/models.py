@@ -10,16 +10,20 @@ class Item(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
-    current_bid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    bid_expiry = models.DateTimeField(default=timezone.now)
+    post_time = models.DateTimeField(default=timezone.now)
+    auction_duration = models.DurationField(default=timezone.timedelta(minutes=5))
     image = models.ImageField()
+    available = models.BooleanField(default=True)
+
+    @property
+    def is_auction_active(self):
+        now = timezone.now()
+        auction_start_time = self.post_time
+        auction_end_time = auction_start_time + timedelta(minutes=5)
+        return auction_start_time <= now <= auction_end_time
 
     def __str__(self):
         return self.title
-
-    def update_expiry_time(self):
-        self.bid_expiry = timezone.now() + timedelta(minutes=10)  # Reset timer to 10 minutes from now
-        self.save()
 
 
 class Bid(models.Model):
