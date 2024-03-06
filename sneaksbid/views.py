@@ -19,8 +19,12 @@ from . tokens import generate_token
 # Create your views here.
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
-    queryset = Item.objects.filter(is_active=True)
+    # queryset = Item.objects.filter(is_active=True)
     context_object_name = 'items'
+    ordering = ['-bid_expiry']
+
+    def get_queryset(self):
+        return Item.objects.all()
 
 def signin(request):
     if request.method == 'POST':
