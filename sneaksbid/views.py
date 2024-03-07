@@ -18,7 +18,6 @@ from .forms import SignUpForm
 from .forms import SignInForm
 
 
-
 # Create your views here.
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
@@ -48,7 +47,7 @@ def signin(request):
                 return redirect('home')
     else:
         form = SignInForm()
-    return render(request, "authentication/signin.html",{'form':form})
+    return render(request, "authentication/signin.html", {'form': form})
 
 
 def signup(request):
@@ -105,7 +104,8 @@ def signup(request):
             email.fail_silently = True
             email.send()
 
-            messages.success(request, "Your Account has been created successfully! Please check your email to confirm your email address in order to activate your account.")
+            messages.success(request,
+                             "Your Account has been created successfully! Please check your email to confirm your email address in order to activate your account.")
             return redirect('signin')
         else:
             # Form is not valid
@@ -113,7 +113,6 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'authentication/signup.html', {'form': form})
-
 
 
 def activate(request, uidb64, token):
