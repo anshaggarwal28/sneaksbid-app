@@ -41,14 +41,15 @@ def signin(request):
             if user is not None:
                 login(request, user)
                 fname = user.first_name
-                # messages.success(request, "Logged In Successfully!!")
-                return render(request, "authentication/index.html", {"fname": fname})
+                messages.success(request, "Logged In Successfully!!")
+                #return redirect('home')
+                return render(request, "sneaksbid/homepage.html", {"fname": fname})
             else:
                 messages.error(request, "Bad Credentials!!")
                 return redirect('home')
     else:
         form = SignInForm()
-    return render(request, "authentication/signin.html",{'form':form})
+        return render(request, "authentication/signin.html",{'form':form})
 
 
 def signup(request):
