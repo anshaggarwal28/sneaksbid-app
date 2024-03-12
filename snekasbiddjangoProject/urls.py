@@ -26,10 +26,7 @@ urlpatterns = [
     path('signout', views.signout, name='signout'),
     path('signup', views.signup, name='signup'),
     path('activate/<uidb64>/<token>', views.activate, name='activate'),
-<<<<<<< HEAD
     path('shop', views.shop, name='shop'),
-=======
     path('item/<int:item_id>/', views.item_detail, name='item_detail'),
     path('item/<int:item_id>/bid/', views.place_bid, name='place_bid'),
->>>>>>> 28a36567e952cf7e8586c59d8a2760e07bdb922e
 ]
