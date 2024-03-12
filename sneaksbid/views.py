@@ -1,11 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
-<<<<<<< HEAD
-
-from sneaksbid.models import Item, OrderItem
-=======
-from sneaksbid.models import Item, Bid
->>>>>>> 28a36567e952cf7e8586c59d8a2760e07bdb922e
+from sneaksbid.models import Item, OrderItem, Bid
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -144,7 +139,6 @@ def signout(request):
     return redirect('home')
 
 
-<<<<<<< HEAD
 def shop(request):
     # Retrieve all items from the database
     sneakers = Item.objects.all()
@@ -154,7 +148,7 @@ def shop(request):
     }
 
     return render(request, 'sneaksbid/shop.html', context)
-=======
+
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     return render(request, './sneaksbid/item_detail.html', {'item': item})
@@ -179,4 +173,3 @@ def place_bid(request, item_id):
         Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
         messages.success(request, "Bid placed successfully.")
     return redirect('item_detail', item_id=item.id)
->>>>>>> 28a36567e952cf7e8586c59d8a2760e07bdb922e
