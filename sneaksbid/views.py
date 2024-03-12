@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
 
-from sneaksbid.models import Item
+from sneaksbid.models import Item, OrderItem
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -131,3 +131,14 @@ def signout(request):
     logout(request)
     messages.success(request, "Logged Out Successfully!!")
     return redirect('home')
+
+
+def shop(request):
+    # Retrieve all items from the database
+    sneakers = Item.objects.all()
+
+    context = {
+        'sneakers': sneakers,
+    }
+
+    return render(request, 'sneaksbid/shop.html', context)

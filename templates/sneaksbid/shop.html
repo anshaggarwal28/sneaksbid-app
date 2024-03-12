@@ -1,0 +1,54 @@
+{% extends './base.html' %}
+{% load static %}
+{% block content %}
+<style type="text/css">
+	.selection-2{
+	display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da !important;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+	}
+</style>
+
+	<!-- Title Page -->
+	<section class="bg-title-page p-t-50 p-b-40 flex-col-c-m" style="background-image: url(/static/images/shop-bg-image.jpeg);">
+		<h2 class="l-text2 t-center">
+			Shop
+		</h2>
+		<p class="m-text13 t-center">
+			All categories
+		</p>
+	</section>
+
+	<!-- Display Sneakers -->
+	
+	<section class="container">
+		{% for sneaker in sneakers %}
+			<div class="card mb-3">
+				<div class="row g-0">
+					<div class="col-md-4">
+						<img src="{{ sneaker.image.url }}" alt="{{ sneaker.name }}" class="img-fluid">
+					</div>
+					<div class="col-md-8">
+						<div class="card-body">
+							<h5 class="card-title">{{ sneaker.name }}</h5>
+							<p class="card-text">{{ sneaker.description }}</p>
+							<p class="card-text"><small class="text-muted">Price: ${{ sneaker.price }}</small></p>
+							<a href="{% url 'sneaker_detail' sneaker.id %}" class="btn btn-primary">View Details</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	</section>
+
+{% endblock content %}
