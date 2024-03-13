@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
-from sneaksbid.models import Item, OrderItem, Bid
+from sneaksbid.models import Item, Bid, OrderItem
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -148,6 +148,7 @@ def shop(request):
     }
 
     return render(request, 'sneaksbid/shop.html', context)
+
 
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
