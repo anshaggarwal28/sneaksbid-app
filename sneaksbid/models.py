@@ -71,7 +71,7 @@ class Order(models.Model):
     def __str__(self):
         return self.user.username
 
-    def get_total_ordered_price(self);
+    def get_total_ordered_price(self):
         total_price = 0
         for ordered_item in self.ordered_items.all():
             total_price += ordered_item.price
