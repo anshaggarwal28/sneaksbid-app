@@ -50,19 +50,9 @@ class OrderItem(models.Model):
         return self.quantity * self.item.current_bid
 
 
-class BillingAddress(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    street_address = models.CharField(max_length=100)
-    apartment_address = models.CharField(max_length=100)
-    country = models.CharField(max_length=50)
-    zip_code = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.user.username
-
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    ordered_items = models.ManyToMany(OrderItem)
+    ordered_items = models.ManyToManyField(OrderItem)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
     order_delivered = models.BooleanField(default=False)
