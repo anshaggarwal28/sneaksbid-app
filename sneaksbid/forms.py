@@ -1,7 +1,9 @@
+from decimal import Decimal
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Payment
+from .models import Payment, Bid
 
 
 class SignUpForm(UserCreationForm):
@@ -26,6 +28,8 @@ class SignInForm(forms.Form):
         'placeholder': 'Enter Your Password',
         'id': 'pass1',
         'required': True}))
+
+
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment
@@ -34,3 +38,18 @@ class PaymentForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'description': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ['bid_amount']
+        widgets = {
+            'bid_amount': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.item = kwargs.pop('item', None)
+        super(BidForm, self).__init__(*args, **kwargs)
+        if self.item:
+            self.fields['bid_amount'].widget.attrs['min'] = str(self.item.base_price + Decimal('0.01'))

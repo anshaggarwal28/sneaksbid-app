@@ -14,6 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from sneaksbid import views
@@ -31,4 +33,7 @@ urlpatterns = [
     path('item/<int:item_id>/bid/', views.place_bid, name='place_bid'),
     path('payment/', views.payment, name='payment'),
     path('process_payment/<str:client_secret>/', views.process_payment, name='process_payment'),
+
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
