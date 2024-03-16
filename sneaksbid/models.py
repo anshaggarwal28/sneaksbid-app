@@ -3,6 +3,7 @@ from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
+from djstripe.models import StripeModel
 
 
 # Create your models here.
@@ -62,7 +63,7 @@ class BillingAddress(models.Model):
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    ordered_items = models.ManyToMany(OrderItem)
+    ordered_items = models.ManyToManyField(OrderItem)
     ordered_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
     order_delivered = models.BooleanField(default=False)
@@ -76,3 +77,12 @@ class Order(models.Model):
         for ordered_item in self.ordered_items.all():
             total_price += ordered_item.price
         return total_price
+
+class Payment(StripeModel):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.CharField(max_length=100)
+    paid = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+     return f'{self.user.username} - {self.description}'

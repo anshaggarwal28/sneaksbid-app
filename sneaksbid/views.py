@@ -16,6 +16,11 @@ from decimal import Decimal
 from django.conf import settings
 from .forms import SignUpForm
 from .forms import SignInForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import PaymentForm
+from .models import Payment
+import stripe
 
 
 # Create your views here.
@@ -174,3 +179,45 @@ def place_bid(request, item_id):
         Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
         messages.success(request, "Bid placed successfully.")
     return redirect('item_detail', item_id=item.id)
+
+
+def payment(request):
+    form = PaymentForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.user = request.user
+            payment.save()
+
+            # Create a Stripe PaymentIntent
+            stripe.api_key = settings.STRIPE_PRIVATE_KEY
+            intent = stripe.PaymentIntent.create(
+                amount=int(payment.amount * 100),
+                currency='usd',
+                metadata={'payment_id': payment.id}
+            )
+
+            # Redirect to the payment processing view
+            return redirect('process_payment', intent.client_secret)
+
+    context = {'form': form}
+    return render(request, './sneaksbid/payment.html', context)
+
+def process_payment(request, client_secret):
+    if request.method == "POST":
+        stripe.api_key = settings.STRIPE_PRIVATE_KEY
+        intent = stripe.PaymentIntent.confirm(client_secret)
+
+        if intent.status == 'succeeded':
+            # Update the Payment model
+            payment_id = intent.metadata['payment_id']
+            payment = Payment.objects.get(id=payment_id)
+            payment.paid = True
+            payment.save()
+
+            messages.success(request, 'Payment successful!')
+            return redirect('success')
+
+    context = {'client_secret': client_secret}
+    return render(request, './sneaksbid/process_payment.html', context)

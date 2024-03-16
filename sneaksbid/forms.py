@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import Payment
 
 
 class SignUpForm(UserCreationForm):
@@ -25,3 +26,11 @@ class SignInForm(forms.Form):
         'placeholder': 'Enter Your Password',
         'id': 'pass1',
         'required': True}))
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = ('amount', 'description',)
+        widgets = {
+            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+        }
