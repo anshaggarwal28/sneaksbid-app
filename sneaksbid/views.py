@@ -158,16 +158,31 @@ def shop(request):
     return render(request, 'sneaksbid/shop.html', context)
 
 
-def product_detail(request, item_id):
-    sneaker = get_object_or_404(Item, pk=item_id)
-    return render(request, 'sneaksbid/item_detail_home.html', {'sneaker': sneaker})
-
-
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    if request.method == 'POST' and item.is_auction_active and request.user.is_authenticated:
+    return render(request, 'sneaksbid/item_detail.html', {'item': item})
+
+
+@login_required
+def place_bid(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+
+    if not item.available or not item.is_auction_active:
+        messages.error(request, "The auction is not currently active or the item is not available.")
+        return redirect('item_detail', item_id=item.id)
+
+    if request.method == 'POST':
         form = BidForm(request.POST, item=item)
         if form.is_valid():
+            bid_amount = form.cleaned_data['bid_amount']
+            last_bid = item.bids.order_by('-bid_amount').first()
+            if last_bid and bid_amount <= last_bid.bid_amount:
+                messages.error(request, "Your bid must be higher than the current highest bid.")
+                return redirect('place_bid', item_id=item.id)
+            elif bid_amount <= item.base_price:
+                messages.error(request, "Your bid must be higher than the base price.")
+                return redirect('place_bid', item_id=item.id)
+
             bid = form.save(commit=False)
             bid.item = item
             bid.user = request.user
@@ -178,30 +193,8 @@ def item_detail(request, item_id):
             messages.error(request, "There was a problem with your bid.")
     else:
         form = BidForm(item=item)
-    return render(request, 'sneaksbid/item_detail.html', {'item': item, 'form': form})
 
-
-@login_required
-def place_bid(request, item_id):
-    item = get_object_or_404(Item, id=item_id)
-    if not item.available or not item.is_auction_active:
-        messages.error(request, "The auction is not currently active or the item is not available.")
-        return redirect('item_detail', item_id=item.id)
-
-    if request.method == 'POST':
-        bid_amount = Decimal(request.POST.get('bid_amount', 0))
-        with transaction.atomic():
-            last_bid = item.bids.order_by('-bid_amount').first()
-            if last_bid and bid_amount <= last_bid.bid_amount:
-                messages.error(request, "Your bid must be higher than the current highest bid.")
-                return redirect('item_detail', item_id=item.id)
-            elif bid_amount <= item.base_price:
-                messages.error(request, "Your bid must be higher than the base price.")
-                return redirect('item_detail', item_id=item.id)
-
-            Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
-            messages.success(request, "Bid placed successfully.")
-    return redirect('item_detail', item_id=item.id)
+    return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item})
 
 
 def payment(request):

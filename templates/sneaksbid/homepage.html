@@ -135,7 +135,7 @@
             </div>
         </div>
         <div class="block2-txt p-t-20">
-            {{ item.title }}
+            <a href="{% url 'item_detail' item_id=item.id %}" class="block2-name dis-block s-text3 p-b-5">{{ item.title }}</a>
             {% if item.is_auction_active %}
                 <span class="block2-price m-text6 p-r-5">:${{ item.base_price }}</span>
             {% else %}
