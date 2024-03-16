@@ -7,7 +7,7 @@
 */
 .block2-labelpromotion::before,
 .block2-labelsale::before,
-.block2-labelnew::before 
+.block2-labelnew::before
 {
   z-index: 100;
   font-family: Montserrat-Regular;
@@ -65,7 +65,7 @@
 		.hov1{
 			background-color: white !important;
 			color: black !important;
-			
+
 		}
 	</style>
 
@@ -76,76 +76,80 @@
 			padding-bottom: 2px;
 		}
 	</style>
-	<section class="newproduct bgwhite p-t-45 p-b-105">
-		<div class="container">
-			<div class="sec-title p-b-60">
-				<h3 class="m-text5 t-center">
-					Featured Products
-				</h3>
-			</div>
+    <style>
+    /* Styles for featured products */
+    .block2-img {
+        position: relative;
+        overflow: hidden;
+    }
+    .block2-img img {
+        width: 100%;
+        height: auto; /* Maintain aspect ratio */
+        transition: transform 0.3s ease; /* Smooth transition effect */
+    }
+    .block2-img:hover img {
+        transform: scale(1.05); /* Scale up on hover */
+    }
 
-			<!-- Slide2 -->
-			<div class="wrap-slick2">
-				<div class="slick2">
+    /* Styles for banners */
+    .banner-img {
+        width: 100%;
+        height: auto; /* Maintain aspect ratio */
+        border-radius: 10px; /* Rounded corners */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    }
 
-					{% for item in object_list %}
-					
-					<div class="item-slick2 p-l-15 p-r-15">
-						<!-- Block2 -->
-						<div class="block2">
-							
-							<div class="block2-img wrap-pic-w of-hidden pos-relative block2-label{{item.get_label_display}}">
-								<a href="{{item.get_absolute_url}}">
-								<img src="https://img.buzzfeed.com/buzzfeed-static/complex/images/Y19jcm9wLGhfMTA2NSx3XzE4OTMseF81MSx5XzY2Mg==/jczrzgiymddftgcdheiu/nike-air-force-1-low-terror-squad-fj5756-100-pair.jpg?output-format=jpg&output-quality=auto" alt="IMG-PRODUCT" 
-								style="height: 370px; width:100%; "></a>
-							   
+    /* Styles for buttons */
+    .btn-shop {
+        background-color: #000;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    .btn-shop:hover {
+        background-color: #333; /* Darken on hover */
+    }
+</style>
+<section class="newproduct bgwhite p-t-45 p-b-105">
+    <div class="container">
+        <div class="sec-title p-b-60">
+            <h3 class="m-text5 t-center">Featured Products</h3>
+        </div>
+        <!-- Slide2 -->
+       <div class="wrap-slick2">
+    <div class="slick2">
+     {% for item in object_list %}
+<div class="item-slick2 p-l-15 p-r-15">
+    <!-- Block2 -->
+    <div class="block2">
+        <div class="block2-img wrap-pic-w of-hidden pos-relative block2-label{{item.get_label_display}}">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="featured-img">
+            <div class="block2-overlay trans-0-4">
+                <a href="#" class="block2-btn-addwishlist hov-pointer trans-0-4">
+                    <i class="icon-wishlist icon_heart_alt" aria-hidden="true"></i>
+                    <i class="icon-wishlist icon_heart dis-none" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+        <div class="block2-txt p-t-20">
+            {{ item.title }}
+            {% if item.is_auction_active %}
+                <span class="block2-price m-text6 p-r-5">:${{ item.base_price }}</span>
+            {% else %}
+                <span class="block2-price m-text6 p-r-5">:Auction not live</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
 
-								 <div class="block2-overlay trans-0-4">
-									<a href="#" class="block2-btn-addwishlist hov-pointer trans-0-4">
-										<i class="icon-wishlist icon_heart_alt" aria-hidden="true"></i>
-										<i class="icon-wishlist icon_heart dis-none" aria-hidden="true"></i>
-									</a>
-
-
-								</div>
-							</div>
-							
-
-							<div class="block2-txt p-t-20">
-								<a href="{{item.get_absolute_url}}" class="block2-name dis-block s-text3 p-b-5" style="color: black;">
-									{{ item.title }}
-								</a>
-
-								{% if item.discount_price %}
-								<span class="block2-oldprice m-text7 p-r-5" style="color: black;">
-									${{ item.price }}
-								</span>
-
-								<span class="block2-newprice m-text8 p-r-5">
-									${{ item.discount_price }}
-								</span>
-								{% else %}
-								<span class="block2-price m-text6 p-r-5" style="color: black;">
-									${{ item.price }}
-								</span>
-								{% endif %}
-								
-
-								
-							</div>
-							
-						</div>
-					</div>
-				
-					{% endfor %}
-
-					
-				
-				</div>
-			</div>
-
-		</div>
-	</section>
+            </div>
+        </div>
+    </div>
+</section>
 
 	<!-- ------------------Banner2  start ------------------------>
 	<style>
@@ -176,7 +180,7 @@
 			background-color: whitesmoke;
 			color: #000 !important;
 			opacity: 0.7;
-	
+
 		}
 	</style>
 	<section class="banner2 bg5 p-t-55 p-b-55">
@@ -195,10 +199,10 @@
 							</span>
 
 							<br>
-							
+
 
 								<div class="wrap-btn-slide1 w-size1 animated" data-appear="slideInUp">
-						
+
 							<a href="/shop/" class="flex-c-m size2 bo-rad-23 s-text2 bgwhite  trans-0-4">
 								Shop Now
 							</a>
@@ -220,10 +224,10 @@
 							</span>
 
 							<br>
-							
+
 
 								<div class="wrap-btn-slide1 w-size1 animated" data-appear="slideInUp">
-						
+
 							<a href="/shop/" class="flex-c-m size2 bo-rad-23 s-text2 bgwhite  trans-0-4">
 								Shop Now
 							</a>
@@ -233,7 +237,7 @@
 					</div>
 				</div>
 
-			
+
 			</div>
 		</div>
 	</section>
@@ -251,13 +255,13 @@
 <br><br>
 <section class="slide1">
 
-	
+
 	<div class="wrap-slick2">
 		<div class="slick1">
-			
-		
-	
-			
+
+
+
+
 
 			<div class="item-slick1 item2-slick1" style="background-image: url('https://static.nike.com/a/images/f_auto/dpr_2.0/w_1407,c_limit/a01665bf-08e7-4d5d-8fb6-841382e3f900/nike-just-do-it.jpg');">
 					<div class="wrap-content-slide1 sizefull flex-col-c-m p-l-15 p-r-15 p-t-150 p-b-170">
@@ -268,7 +272,7 @@
 							FAST IS BACK
 						</h2>
 						<div class="wrap-btn-slide1 w-size1 " data-appear="slideInUp">
-							
+
 							<a href="/shop/" class="flex-c-m size2 bo-rad-23 s-text2 bgwhite hov1 trans-0-4">
 								Shop Now
 							</a>
@@ -300,10 +304,10 @@
 							</span>
 
 							<br>
-							
+
 
 								<div class="wrap-btn-slide1 w-size1 animated" data-appear="slideInUp">
-						
+
 							<a href="/shop/" class="flex-c-m size2 bo-rad-23 s-text2 bgwhite  trans-0-4">
 								Shop Now
 							</a>
@@ -318,8 +322,8 @@
 	</section>
 
 
-	
-	
+
+
 
 	<!-- Shipping -->
 	<section class="shipping bgwhite p-t-62 p-b-46">
@@ -359,9 +363,8 @@
 
 
 
-	
+
 
 	{% endblock content %}
 
 
-	

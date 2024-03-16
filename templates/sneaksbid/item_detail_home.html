@@ -1,0 +1,37 @@
+{% extends './base.html' %}
+{% load static %}
+{% block content %}
+<style type="text/css">
+	.selection-2{
+	display: block;
+    width: 100%;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da !important;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+	}
+</style>
+<div class="sneaker-images">
+    <div class="sneaker">
+        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        <h3>{{ item.title }}</h3>
+        <p>Description: {{ item.description }}</p>
+        <p>Price: ${{ item.base_price }}</p>
+        {% if item.is_auction_active %}
+            <p>Auction is active!</p>
+        {% else %}
+            <p>Auction is not active.</p>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'place_bid' item_id=item.id %}" class="btn btn-primary">Place Bid</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

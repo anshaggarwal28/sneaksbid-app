@@ -12,16 +12,15 @@ class Item(models.Model):
     description = models.TextField()
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     post_time = models.DateTimeField(default=timezone.now)
-    auction_duration = models.DurationField(default=timezone.timedelta(minutes=5))
-    image = models.ImageField()
+    auction_duration = models.DurationField(default=timezone.timedelta(days=1))  # Auction lasts for 1 day
+    image = models.ImageField(upload_to='items/')
     available = models.BooleanField(default=True)
 
     @property
     def is_auction_active(self):
         now = timezone.now()
-        auction_start_time = self.post_time
-        auction_end_time = auction_start_time + timedelta(minutes=5)
-        return auction_start_time <= now <= auction_end_time
+        auction_end_time = self.post_time + self.auction_duration
+        return self.post_time <= now <= auction_end_time
 
     def __str__(self):
         return self.title

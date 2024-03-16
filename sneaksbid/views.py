@@ -1,3 +1,7 @@
+from django.utils import timezone
+
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View
 from sneaksbid.models import Item, Bid, OrderItem
@@ -18,9 +22,8 @@ from .forms import SignUpForm
 from .forms import SignInForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import PaymentForm
+from .forms import PaymentForm, BidForm
 from .models import Payment
-import stripe
 
 
 # Create your views here.
@@ -155,29 +158,49 @@ def shop(request):
     return render(request, 'sneaksbid/shop.html', context)
 
 
+def product_detail(request, item_id):
+    sneaker = get_object_or_404(Item, pk=item_id)
+    return render(request, 'sneaksbid/item_detail_home.html', {'sneaker': sneaker})
+
+
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    return render(request, './sneaksbid/item_detail.html', {'item': item})
+    if request.method == 'POST' and item.is_auction_active and request.user.is_authenticated:
+        form = BidForm(request.POST, item=item)
+        if form.is_valid():
+            bid = form.save(commit=False)
+            bid.item = item
+            bid.user = request.user
+            bid.save()
+            messages.success(request, "Bid placed successfully.")
+            return redirect('item_detail', item_id=item.id)
+        else:
+            messages.error(request, "There was a problem with your bid.")
+    else:
+        form = BidForm(item=item)
+    return render(request, 'sneaksbid/item_detail.html', {'item': item, 'form': form})
 
 
+@login_required
 def place_bid(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    if not item.is_auction_active:
-        messages.error(request, "The auction is not currently active.")
+    if not item.available or not item.is_auction_active:
+        messages.error(request, "The auction is not currently active or the item is not available.")
         return redirect('item_detail', item_id=item.id)
 
     if request.method == 'POST':
         bid_amount = Decimal(request.POST.get('bid_amount', 0))
-        last_bid = item.bids.last()
-        if last_bid and bid_amount <= last_bid.bid_amount:
-            messages.error(request, "Your bid must be higher than the current highest bid.")
-            return redirect('item_detail', item_id=item.id)
-        elif bid_amount <= item.base_price:
-            messages.error(request, "Your bid must be higher than the base price.")
-            return redirect('item_detail', item_id=item.id)
+        with transaction.atomic():
+            last_bid = item.bids.order_by('-bid_amount').first()
+            if last_bid and bid_amount <= last_bid.bid_amount:
+                messages.error(request, "Your bid must be higher than the current highest bid.")
+                return redirect('item_detail', item_id=item.id)
+            elif bid_amount <= item.base_price:
+                messages.error(request, "Your bid must be higher than the base price.")
+                return redirect('item_detail', item_id=item.id)
 
-        Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
-        messages.success(request, "Bid placed successfully.")
+            Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
+            messages.success(request, "Bid placed successfully.")
     return redirect('item_detail', item_id=item.id)
 
 
@@ -203,6 +226,7 @@ def payment(request):
 
     context = {'form': form}
     return render(request, './sneaksbid/payment.html', context)
+
 
 def process_payment(request, client_secret):
     if request.method == "POST":
