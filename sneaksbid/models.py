@@ -1,9 +1,12 @@
 from django.db import models
 from django.conf import settings
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
-from djstripe.models import StripeModel
+
 
 
 # Create your models here.
@@ -90,15 +93,15 @@ class Order(models.Model):
         return total_price
 
 
-class Payment(StripeModel):
+
+class Payment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.CharField(max_length=100)
-    paid = models.BooleanField(default=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    #timestamp = models.DateTimeField(default=timezone.now)
+    stripe_charge_id = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.user.username} - {self.description}'
-
+        return f"{self.user.username} - {self.amount} - {self.timestamp}"
 
 class Shoe(Item):
     # Add shoe-specific fields here if needed, for example:

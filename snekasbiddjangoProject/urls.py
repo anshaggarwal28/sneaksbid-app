@@ -31,8 +31,7 @@ urlpatterns = [
     path('shop/', views.shop, name='shop'),
     path('item/<int:item_id>/', views.item_detail, name='item_detail'),
     path('item/<int:item_id>/bid/', views.place_bid, name='place_bid'),
-    path('payment/', views.payment, name='payment'),
-    path('process_payment/<str:client_secret>/', views.process_payment, name='process_payment'),
+    path('payment/', views.process_payment, name='process_payment'),
     path('add-shoe/', ShoeCreateView.as_view(), name='add_shoe'),
 
 ]

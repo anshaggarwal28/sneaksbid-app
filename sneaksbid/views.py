@@ -23,7 +23,7 @@ from .forms import SignUpForm, ShoeForm
 from .forms import SignInForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import PaymentForm, BidForm
+from .forms import BidForm
 from .models import Payment, Shoe
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -194,48 +194,87 @@ def place_bid(request, item_id):
 
     return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item})
 
+#
+# def payment(request):
+#     form = PaymentForm(request.POST or None)
+#
+#     if request.method == "POST":
+#         if form.is_valid():
+#             payment = form.save(commit=False)
+#             payment.user = request.user
+#             payment.save()
+#
+#             # Create a Stripe PaymentIntent
+#             stripe.api_key = settings.STRIPE_PRIVATE_KEY
+#             intent = stripe.PaymentIntent.create(
+#                 amount=int(payment.amount * 100),
+#                 currency='usd',
+#                 metadata={'payment_id': payment.id}
+#             )
+#
+#             # Redirect to the payment processing view
+#             return redirect('process_payment', intent.client_secret)
+#
+#     context = {'form': form}
+#     return render(request, './sneaksbid/payment.html', context)
+#
+#
+# def process_payment(request, client_secret):
+#     if request.method == "POST":
+#         stripe.api_key = settings.STRIPE_PRIVATE_KEY
+#         intent = stripe.PaymentIntent.confirm(client_secret)
+#
+#         if intent.status == 'succeeded':
+#             # Update the Payment model
+#             payment_id = intent.metadata['payment_id']
+#             payment = Payment.objects.get(id=payment_id)
+#             payment.paid = True
+#             payment.save()
+#
+#             messages.success(request, 'Payment successful!')
+#             return redirect('success')
+#
+#     context = {'client_secret': client_secret}
+#     return render(request, './sneaksbid/process_payment.html', context)
+#
+# views.py
+import stripe
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import PaymentForm
+from .models import Payment
 
-def payment(request):
-    form = PaymentForm(request.POST or None)
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    if request.method == "POST":
+@login_required
+def process_payment(request):
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
         if form.is_valid():
-            payment = form.save(commit=False)
-            payment.user = request.user
-            payment.save()
+            # Token is created using Stripe Checkout or Elements!
+            token = request.POST.get('stripeToken')  # Use the name attribute from your Stripe form
+            try:
+                charge = stripe.Charge.create(
+                    amount=int(form.cleaned_data['amount'] * 100),  # Amount in cents
+                    currency='usd',
+                    description='Example charge',
+                    source=token,
+                )
+                Payment.objects.create(
+                    user=request.user,
+                    amount=form.cleaned_data['amount'],
+                    stripe_charge_id=charge.id,
+                )
+                messages.success(request, 'Payment successful!')
+                return redirect('payment_success')
+            except stripe.error.StripeError:
+                messages.error(request, 'Payment error!')
+    else:
+        form = PaymentForm()
+    return render(request, 'sneaksbid/payment.html', {'form': form, 'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY})
 
-            # Create a Stripe PaymentIntent
-            stripe.api_key = settings.STRIPE_PRIVATE_KEY
-            intent = stripe.PaymentIntent.create(
-                amount=int(payment.amount * 100),
-                currency='usd',
-                metadata={'payment_id': payment.id}
-            )
-
-            # Redirect to the payment processing view
-            return redirect('process_payment', intent.client_secret)
-
-    context = {'form': form}
-    return render(request, './sneaksbid/payment.html', context)
-
-
-def process_payment(request, client_secret):
-    if request.method == "POST":
-        stripe.api_key = settings.STRIPE_PRIVATE_KEY
-        intent = stripe.PaymentIntent.confirm(client_secret)
-
-        if intent.status == 'succeeded':
-            # Update the Payment model
-            payment_id = intent.metadata['payment_id']
-            payment = Payment.objects.get(id=payment_id)
-            payment.paid = True
-            payment.save()
-
-            messages.success(request, 'Payment successful!')
-            return redirect('success')
-
-    context = {'client_secret': client_secret}
-    return render(request, './sneaksbid/process_payment.html', context)
 
 
 class ShoeCreateView(LoginRequiredMixin, CreateView):
