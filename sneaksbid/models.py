@@ -22,6 +22,17 @@ class Item(models.Model):
         auction_end_time = self.post_time + self.auction_duration
         return self.post_time <= now <= auction_end_time
 
+    @property
+    def duration_days(self):
+        return self.auction_duration.days
+
+    @property
+    def duration_hours(self):
+        return self.auction_duration.seconds // 3600
+
+    @property
+    def duration_minutes(self):
+        return (self.auction_duration.seconds % 3600) // 60
     def __str__(self):
         return self.title
 
@@ -60,6 +71,7 @@ class BillingAddress(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered_items = models.ManyToManyField(OrderItem)
@@ -77,6 +89,7 @@ class Order(models.Model):
             total_price += ordered_item.price
         return total_price
 
+
 class Payment(StripeModel):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=100)
@@ -84,4 +97,12 @@ class Payment(StripeModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-     return f'{self.user.username} - {self.description}'
+        return f'{self.user.username} - {self.description}'
+
+
+class Shoe(Item):
+    # Add shoe-specific fields here if needed, for example:
+    size = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"{self.title} - {self.size}"

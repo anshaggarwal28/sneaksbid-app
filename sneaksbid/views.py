@@ -1,9 +1,10 @@
+from django.urls import reverse_lazy
 from django.utils import timezone
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, View
+from django.views.generic import ListView, DetailView, View, CreateView
 from sneaksbid.models import Item, Bid, OrderItem
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -18,13 +19,13 @@ from django.contrib.auth import authenticate, login, logout
 from .tokens import generate_token
 from decimal import Decimal
 from django.conf import settings
-from .forms import SignUpForm
+from .forms import SignUpForm, ShoeForm
 from .forms import SignInForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import PaymentForm, BidForm
-from .models import Payment
-
+from .models import Payment, Shoe
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
 class HomeView(ListView):
@@ -35,7 +36,6 @@ class HomeView(ListView):
 
     def get_queryset(self):
         return Item.objects.all()
-
 
 def signin(request):
     if request.method == 'POST':
@@ -238,3 +238,11 @@ def process_payment(request, client_secret):
 
     context = {'client_secret': client_secret}
     return render(request, './sneaksbid/process_payment.html', context)
+
+
+class ShoeCreateView(LoginRequiredMixin, CreateView):
+    model = Shoe
+    form_class = ShoeForm
+    template_name = 'sneaksbid/shoe_form.html'  # Adjust the template path if needed
+    success_url = reverse_lazy('home')
+    login_url = '/signin/'

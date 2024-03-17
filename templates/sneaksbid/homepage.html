@@ -134,14 +134,17 @@
                 </a>
             </div>
         </div>
-        <div class="block2-txt p-t-20">
-            <a href="{% url 'item_detail' item_id=item.id %}" class="block2-name dis-block s-text3 p-b-5">{{ item.title }}</a>
-            {% if item.is_auction_active %}
-                <span class="block2-price m-text6 p-r-5">:${{ item.base_price }}</span>
-            {% else %}
-                <span class="block2-price m-text6 p-r-5">:Auction not live</span>
-            {% endif %}
-        </div>
+      <div class="block2-txt p-t-20">
+  <a href="{% url 'item_detail' item_id=item.id %}" class="block2-name dis-block s-text3 p-b-5">{{ item.title }}</a>
+  {% if item.is_auction_active %}
+    <span class="block2-price m-text6 p-r-5">${{ item.base_price }}</span>
+   <div id="auction-timer-{{ item.id }}" class="auction-timer">
+    Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
+</div>
+  {% else %}
+    <span class="block2-price m-text6 p-r-5">Auction not live or ended</span>
+  {% endif %}
+</div>
     </div>
 </div>
 {% endfor %}

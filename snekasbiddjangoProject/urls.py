@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from sneaksbid import views
-from sneaksbid.views import HomeView, shop
+from sneaksbid.views import HomeView, shop, ShoeCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,6 +33,7 @@ urlpatterns = [
     path('item/<int:item_id>/bid/', views.place_bid, name='place_bid'),
     path('payment/', views.payment, name='payment'),
     path('process_payment/<str:client_secret>/', views.process_payment, name='process_payment'),
+    path('add-shoe/', ShoeCreateView.as_view(), name='add_shoe'),
 
 ]
 if settings.DEBUG:
