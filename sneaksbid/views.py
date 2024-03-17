@@ -27,10 +27,8 @@ from .forms import PaymentForm, BidForm
 from .models import Payment, Shoe
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-# Create your views here.
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
-    # queryset = Item.objects.filter(is_active=True)
     context_object_name = 'items'
     ordering = ['-bid_expiry']
 
