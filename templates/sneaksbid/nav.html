@@ -35,6 +35,9 @@
               <a href="{% url 'shop' %}">Shop</a>
             </li>
             <li>
+              <a href="{% url 'add_shoe' %}">Sell</a>
+            </li>
+            <li>
               <a href="{% url 'signout' %}">Logout</a>
             </li>
             {% else %}
@@ -44,9 +47,7 @@
             <li>
               <a href="{% url 'signup' %}">Sign up</a>
             </li>
-            <li>
-              <a href="{% url 'add-shoe' %}">Sell</a>
-            </li>
+
             {% endif %}
           </ul>
         </nav>
