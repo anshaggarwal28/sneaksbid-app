@@ -6,7 +6,7 @@ from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, View, CreateView
 from sneaksbid.models import Item, Bid, OrderItem
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.mail import EmailMessage, send_mail
@@ -154,6 +154,12 @@ def shop(request):
     }
 
     return render(request, 'sneaksbid/shop.html', context)
+
+
+def search_sneakers(request):
+    query = request.GET.get('query')
+    search_results = Item.objects.filter(title__icontains=query)
+    return render(request, 'sneaksbid/search_result.html', {'search_results': search_results})
 
 
 def item_detail(request, item_id):
