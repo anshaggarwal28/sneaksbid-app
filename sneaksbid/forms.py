@@ -1,6 +1,9 @@
 from datetime import timedelta
 from decimal import Decimal
-
+from django import forms
+from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.models import User
+from .models import Profile
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -83,3 +86,17 @@ class ShoeForm(forms.ModelForm):
 
         # Now save the model instance
         return super(ShoeForm, self).save(commit=commit)
+
+
+
+class UserUpdateForm(UserChangeForm):
+    email = forms.EmailField()
+
+    class Meta:
+     model = User
+     fields = ['username', 'email']
+
+class ProfileImageForm(forms.ModelForm):
+    class Meta:
+            model = Profile
+            fields = ['images']
