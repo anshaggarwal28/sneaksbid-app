@@ -244,3 +244,32 @@ class ShoeCreateView(LoginRequiredMixin, CreateView):
     template_name = 'sneaksbid/shoe_form.html'  # Adjust the template path if needed
     success_url = reverse_lazy('home')
     login_url = '/signin/'
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import UserUpdateForm, ProfileImageForm
+from .models import Profile
+
+
+@login_required
+def dashboard(request):
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        image_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+
+        if user_form.is_valid() and image_form.is_valid():
+            user_form.save()
+            image_form.save()
+            messages.success(request, f'Your account has been updated!')
+            return redirect('dashboard')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        image_form = ProfileImageForm(instance=request.user.profile)
+
+    context = {
+        'user_form': user_form,
+        'image_form': image_form
+    }
+
+    return render(request, 'sneaksbid/dashboard.html', context)

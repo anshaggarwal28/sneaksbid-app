@@ -106,3 +106,17 @@ class Shoe(Item):
 
     def __str__(self):
         return f"{self.title} - {self.size}"
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    images = models.ImageField(upload_to='user_images/', blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.user.username} Profile'
+
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
