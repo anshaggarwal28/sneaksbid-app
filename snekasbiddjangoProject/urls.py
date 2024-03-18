@@ -35,6 +35,7 @@ urlpatterns = [
     path('process_payment/<str:client_secret>/', views.process_payment, name='process_payment'),
     path('add-shoe/', ShoeCreateView.as_view(), name='add_shoe'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('search/', views.search_sneakers, name='search_sneakers'),
 
 ]
 if settings.DEBUG:
