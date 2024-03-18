@@ -1,25 +1,101 @@
 {% extends './base.html' %}
 
-
 {% block content %}
+<style>
+    .item-details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .featured-img {
+        max-width: 300px; /* Set maximum width for the shoe image */
+        height: auto; /* Maintain aspect ratio */
+        margin-bottom: 20px;
+    }
+
+    #bidding-history-chart {
+        max-width: 800px; /* Set maximum width for the graph */
+        height: 400px; /* Set fixed height for the graph */
+        margin-top: 20px;
+    }
+</style>
+
 <div class="item-details">
+    <img src="{{ item.image.url }}" alt="{{ item.title }}" class="featured-img">
     <h2>{{ item.title }}</h2>
-    <p>{{ item.description }}</p>
+    <p>Description: {{ item.description }}</p>
     <p>Base Price: ${{ item.base_price }}</p>
-    <p>Value: {{ item.is_auction_active }}</p>
-    {% if item.is_auction_active %}
-        <p>Auction is currently active!</p>
-        {% if user.is_authenticated %}
-            <form method="post" action="{% url 'place_bid' item.id %}">
-                {% csrf_token %}
-                <input type="number" name="bid_amount" step="0.01" min="{{ item.base_price|add:"0.01" }}" required>
-                <button type="submit">Place Bid</button>
-            </form>
-        {% else %}
-            <p>You need to <a href="{% url 'login' %}">login</a> to place a bid.</p>
-        {% endif %}
+
+    <!-- Display Current Bid -->
+    {% if item.bids.all %}
+        <p>Current Bid: ${{ item.bids.last.bid_amount }}</p>
     {% else %}
-        <p>Auction has not started or has ended.</p>
+        <p>No bids placed yet.</p>
     {% endif %}
+ <p>Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins</p>
+    <!-- List of Last 10 Bids -->
+    <h3>Last 10 Bids:</h3>
+    <ul>
+        {% for bid in item.bids.all|slice:"-10:" %} {# Slice to get last 10 bids #}
+            <li>Bid Amount: ${{ bid.bid_amount }}, Bidder: {{ bid.user.username }}, Time: {{ bid.bid_time|date:"M d"  }}</li>
+        {% empty %}
+            <li>No bids placed yet.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Graph of Bidding History -->
+    <canvas id="bidding-history-chart"></canvas>
 </div>
+
+<!-- Include script to render bidding history graph using Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('bidding-history-chart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [{% for bid in item.bids.all|slice:"-10:" %}"{{ bid.bid_time|date:"M d" }}",{% endfor %}], // Use bid times as labels
+            datasets: [{
+                label: 'Bidding History',
+                data: [{% for bid in item.bids.all|slice:"-10:" %}{{ bid.bid_amount }},{% endfor %}], // Use bid amounts
+                backgroundColor: 'rgba(255, 99, 132, 0.2)', // Background color for the line
+                borderColor: 'rgba(255, 99, 132, 1)', // Border color for the line
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(255, 99, 132, 1)', // Point background color
+                pointBorderColor: 'rgba(255, 99, 132, 1)', // Point border color
+                pointHoverBackgroundColor: 'rgba(255, 99, 132, 1)', // Point background color on hover
+                pointHoverBorderColor: 'rgba(255, 99, 132, 1)', // Point border color on hover
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    },
+                    gridLines: {
+                        color: 'rgba(0, 0, 0, 0.1)' // Color for y-axis gridlines
+                    }
+                }],
+                xAxes: [{
+                    gridLines: {
+                        color: 'rgba(0, 0, 0, 0)' // Hide x-axis gridlines
+                    }
+                }]
+            },
+            legend: {
+                display: true,
+                labels: {
+                    fontColor: 'rgba(0, 0, 0, 0.7)', // Legend font color
+                }
+            },
+            elements: {
+                line: {
+                    tension: 0 // Disable bezier curves
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

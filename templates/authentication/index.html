@@ -96,12 +96,29 @@
 </div>
 {% endfor %}
 
-<h3>Welcome to SneaksBid!</h3>
+<h3>Welcome to SneaksBid! </h3>
 
 {% if user.is_authenticated %}
-<h3>Hello {{fname}}!</h3>
-<h4>You're successfully logged in.</h4>
-<button type="submit"><a href="/signout">SignOut</a></button>
+    <h3>Hello {{ user.first_name }}!</h3>
+    <h4>You're successfully logged in. Redirecting to homepage in <span id="countdown">3</span> seconds...</h4>
+    <button type="submit"><a href="/signout">SignOut</a></button>
+
+    <script>
+        // JavaScript for countdown and redirect
+        var timeLeft = 3; // seconds
+        var countdownElement = document.getElementById('countdown');
+        var timerId = setInterval(countdown, 1000);
+
+        function countdown() {
+            if (timeLeft == 0) {
+                clearTimeout(timerId);
+                window.location.href = '/'; // Redirect to homepage
+            } else {
+                countdownElement.innerHTML = timeLeft;
+                timeLeft--;
+            }
+        }
+    </script>
 {% else %}
 <button type="submit"><a href="/signup">SignUp</a></button>
 <br/>

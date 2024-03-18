@@ -41,6 +41,7 @@
 			<p>Price: ${{ sneaker.base_price }}</p>
 			{% if sneaker.is_auction_active %}
 				<p>Auction is active!</p>
+                      <p>Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins</p>
 			{% else %}
 				<p>Auction is not active.</p>
 			{% endif %}

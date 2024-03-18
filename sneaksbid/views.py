@@ -1,5 +1,10 @@
+from django.urls import reverse_lazy
+from django.utils import timezone
+
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, View
+from django.views.generic import ListView, DetailView, View, CreateView
 from sneaksbid.models import Item, Bid, OrderItem
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -14,20 +19,21 @@ from django.contrib.auth import authenticate, login, logout
 from .tokens import generate_token
 from decimal import Decimal
 from django.conf import settings
-from .forms import SignUpForm
+from .forms import SignUpForm, ShoeForm
 from .forms import SignInForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import PaymentForm, BidForm
+from .models import Payment, Shoe
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-
-# Create your views here.
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
-    # queryset = Item.objects.filter(is_active=True)
     context_object_name = 'items'
     ordering = ['-bid_expiry']
 
     def get_queryset(self):
         return Item.objects.all()
-
 
 def signin(request):
     if request.method == 'POST':
@@ -152,25 +158,118 @@ def shop(request):
 
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    return render(request, './sneaksbid/item_detail.html', {'item': item})
+    return render(request, 'sneaksbid/item_detail.html', {'item': item})
 
 
+@login_required
 def place_bid(request, item_id):
     item = get_object_or_404(Item, id=item_id)
-    if not item.is_auction_active:
-        messages.error(request, "The auction is not currently active.")
+
+    if not item.available or not item.is_auction_active:
+        messages.error(request, "The auction is not currently active or the item is not available.")
         return redirect('item_detail', item_id=item.id)
 
     if request.method == 'POST':
-        bid_amount = Decimal(request.POST.get('bid_amount', 0))
-        last_bid = item.bids.last()
-        if last_bid and bid_amount <= last_bid.bid_amount:
-            messages.error(request, "Your bid must be higher than the current highest bid.")
-            return redirect('item_detail', item_id=item.id)
-        elif bid_amount <= item.base_price:
-            messages.error(request, "Your bid must be higher than the base price.")
-            return redirect('item_detail', item_id=item.id)
+        form = BidForm(request.POST, item=item)
+        if form.is_valid():
+            bid_amount = form.cleaned_data['bid_amount']
+            last_bid = item.bids.order_by('-bid_amount').first()
+            if last_bid and bid_amount <= last_bid.bid_amount:
+                messages.error(request, "Your bid must be higher than the current highest bid.")
+                return redirect('place_bid', item_id=item.id)
+            elif bid_amount <= item.base_price:
+                messages.error(request, "Your bid must be higher than the base price.")
+                return redirect('place_bid', item_id=item.id)
 
-        Bid.objects.create(item=item, user=request.user, bid_amount=bid_amount)
-        messages.success(request, "Bid placed successfully.")
-    return redirect('item_detail', item_id=item.id)
+            bid = form.save(commit=False)
+            bid.item = item
+            bid.user = request.user
+            bid.save()
+            messages.success(request, "Bid placed successfully.")
+            return redirect('item_detail', item_id=item.id)
+        else:
+            messages.error(request, "There was a problem with your bid.")
+    else:
+        form = BidForm(item=item)
+
+    return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item})
+
+
+def payment(request):
+    form = PaymentForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.user = request.user
+            payment.save()
+
+            # Create a Stripe PaymentIntent
+            stripe.api_key = settings.STRIPE_PRIVATE_KEY
+            intent = stripe.PaymentIntent.create(
+                amount=int(payment.amount * 100),
+                currency='usd',
+                metadata={'payment_id': payment.id}
+            )
+
+            # Redirect to the payment processing view
+            return redirect('process_payment', intent.client_secret)
+
+    context = {'form': form}
+    return render(request, './sneaksbid/payment.html', context)
+
+
+def process_payment(request, client_secret):
+    if request.method == "POST":
+        stripe.api_key = settings.STRIPE_PRIVATE_KEY
+        intent = stripe.PaymentIntent.confirm(client_secret)
+
+        if intent.status == 'succeeded':
+            # Update the Payment model
+            payment_id = intent.metadata['payment_id']
+            payment = Payment.objects.get(id=payment_id)
+            payment.paid = True
+            payment.save()
+
+            messages.success(request, 'Payment successful!')
+            return redirect('success')
+
+    context = {'client_secret': client_secret}
+    return render(request, './sneaksbid/process_payment.html', context)
+
+
+class ShoeCreateView(LoginRequiredMixin, CreateView):
+    model = Shoe
+    form_class = ShoeForm
+    template_name = 'sneaksbid/shoe_form.html'  # Adjust the template path if needed
+    success_url = reverse_lazy('home')
+    login_url = '/signin/'
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import UserUpdateForm, ProfileImageForm
+from .models import Profile
+
+
+@login_required
+def dashboard(request):
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        image_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+
+        if user_form.is_valid() and image_form.is_valid():
+            user_form.save()
+            image_form.save()
+            messages.success(request, f'Your account has been updated!')
+            return redirect('dashboard')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        image_form = ProfileImageForm(instance=request.user.profile)
+
+    context = {
+        'user_form': user_form,
+        'image_form': image_form
+    }
+
+    return render(request, 'sneaksbid/dashboard.html', context)
