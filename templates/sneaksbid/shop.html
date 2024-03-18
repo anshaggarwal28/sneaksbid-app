@@ -110,9 +110,11 @@
 				<p>Price: ${{ sneaker.base_price }}</p>
 				{% if sneaker.is_auction_active %}
 					<p>Auction is active!</p>
-						<p>Auction ends in approximately {{ item.auction_duration }} days</p>
+						<div id="auction-timer-{{ sneaker.id }}" class="auction-timer" data-end-time="{{ sneaker.post_time|date:'c' }}" data-duration-seconds="{{ sneaker.auction_duration.total_seconds }}">
+        Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
+    </div>
 				{% else %}
-					<p>Auction is not active.</p>
+					<p> Auction is not active</p>
 				{% endif %}
 				{% if user.is_authenticated %}
 					<a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">Place Bid</a>
@@ -120,4 +122,39 @@
 		</div>
 	{% endfor %}
 </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timers = document.querySelectorAll('.auction-timer');
+
+    timers.forEach(function(timer) {
+        const endTime = new Date(timer.getAttribute('data-end-time')).getTime();
+        const durationSeconds = parseInt(timer.getAttribute('data-duration-seconds'), 10);
+        const auctionEndTime = endTime + (durationSeconds * 1000);
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const timeLeft = auctionEndTime - now;
+
+            if (timeLeft < 0) {
+                timer.innerHTML = "Auction ended";
+                clearInterval(interval); // Stop updating when the auction ends
+                return;
+            }
+
+            // Calculate days, hours, minutes, and seconds
+            let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            // Update the timer's content
+            timer.innerHTML = `Auction ends in approximately ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        };
+
+        // Update the countdown every second
+        updateCountdown(); // Update immediately to avoid delay
+        const interval = setInterval(updateCountdown, 1000);
+    });
+});
+</script>
 {% endblock content %}
