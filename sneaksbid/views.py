@@ -20,11 +20,11 @@ from .tokens import generate_token
 from decimal import Decimal
 from django.conf import settings
 from .forms import SignUpForm, ShoeForm
-from .forms import SignInForm,CheckoutForm
+from .forms import SignInForm, CheckoutForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import PaymentForm, BidForm
-from .models import Payment, Shoe,Order,BillingAddress, Bid
+from .models import Payment2, Shoe, Order, BillingAddress, Bid
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -35,7 +35,6 @@ from django.utils import timezone
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 
-
 '''class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
     context_object_name = 'items'
@@ -43,6 +42,7 @@ from django.http import HttpResponseRedirect
 
     def get_queryset(self):
         return Item.objects.all()'''
+
 
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
@@ -66,7 +66,7 @@ class HomeView(ListView):
         # Include visit count in the context
         context['visit_count'] = self.request.session['visit_count']
         return context
-    
+
 
 def signin(request):
     if request.method == 'POST':
@@ -212,6 +212,7 @@ def item_detail(request, item_id):
 
     return render(request, 'sneaksbid/item_detail.html', context)
 
+
 @login_required
 def place_bid(request, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -259,17 +260,15 @@ def place_bid(request, item_id):
             messages.error(request, "There was a problem with your bid.")
     else:
         form = BidForm(item=item)
-    user= User.username
+    user = User.username
     context = {
         'form': form,
         'item': item,
         'user_won_auction': user_won_auction,
-        'user' : user,
+        'user': user,
     }
 
     return render(request, 'sneaksbid/bid.html', context)
-
-
 
 
 class CheckoutView(View):
@@ -277,7 +276,7 @@ class CheckoutView(View):
         # Retrieve winning bid details for the current user
         form = CheckoutForm()
         winning_bids = Bid.objects.filter(user=request.user, is_winner=True)
-        
+
         # Pass bid details to the template for rendering the checkout form
         context = {'form': form, 'winning_bids': winning_bids}
         return render(request, 'sneaksbid/checkout.html', context)
@@ -304,25 +303,45 @@ class CheckoutView(View):
         # If form is not valid, render the checkout form again with error messages
         context = {'form': form}
         return render(request, 'sneaksbid/checkout.html', context)
-    
 
-def process_payment(request, client_secret):
-    if request.method == "POST":
-        stripe.api_key = settings.STRIPE_PRIVATE_KEY
-        intent = stripe.PaymentIntent.confirm(client_secret)
 
-        if intent.status == 'succeeded':
-            # Update the Payment model
-            payment_id = intent.metadata['payment_id']
-            payment = Payment.objects.get(id=payment_id)
-            payment.paid = True
-            payment.save()
+import stripe
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import PaymentForm
 
-            messages.success(request, 'Payment successful!')
-            return redirect('home')
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    context = {'client_secret': client_secret}
-    return render(request, './sneaksbid/process_payment.html', context)
+
+@login_required
+def process_payment(request):
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            # Token is created using Stripe Checkout or Elements!
+            token = request.POST.get('stripeToken')  # Use the name attribute from your Stripe form
+            try:
+                charge = stripe.Charge.create(
+                    amount=int(form.cleaned_data['amount'] * 100),  # Amount in cents
+                    currency='usd',
+                    # description='Example charge',
+                    source=token,
+                )
+                Payment2.objects.create(
+                    user=request.user,
+                    amount=form.cleaned_data['amount'],
+                    stripe_charge_id=charge.id,
+                )
+                messages.success(request, 'Payment successful!')
+                return redirect('payment_success')
+            except stripe.error.StripeError:
+                messages.error(request, 'Payment error!')
+    else:
+        form = PaymentForm()
+    return render(request, 'sneaksbid/payment.html',
+                  {'form': form, 'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY})
 
 
 class ShoeCreateView(LoginRequiredMixin, CreateView):
