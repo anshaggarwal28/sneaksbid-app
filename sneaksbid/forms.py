@@ -9,7 +9,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from werkzeug.routing import ValidationError
 
-from .models import Payment, Bid, Shoe
+from .models import Payment2, Bid, Shoe
 
 
 class SignUpForm(UserCreationForm):
@@ -36,15 +36,11 @@ class SignInForm(forms.Form):
         'required': True}))
 
 
-class PaymentForm(forms.ModelForm):
-    class Meta:
-        model = Payment
-        fields = ('amount', 'description',)
-        widgets = {
-            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
-            'description': forms.TextInput(attrs={'class': 'form-control'}),
-        }
-
+class PaymentForm(forms.Form):
+    amount = forms.DecimalField(decimal_places=2, max_digits=10, widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Amount',
+        }))
 
 class BidForm(forms.ModelForm):
     class Meta:

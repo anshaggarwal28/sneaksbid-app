@@ -49,14 +49,22 @@ INSTALLED_APPS = [
 ]
 
 # Stripe settings
-STRIPE_LIVE_PUBLIC_KEY = os.getenv("STRIPE_LIVE_PUBLIC_KEY")
-STRIPE_LIVE_SECRET_KEY = os.getenv("STRIPE_LIVE_SECRET_KEY")
-STRIPE_TEST_PUBLIC_KEY = os.getenv("STRIPE_TEST_PUBLIC_KEY")
-STRIPE_TEST_SECRET_KEY = os.getenv("STRIPE_TEST_SECRET_KEY")
-STRIPE_LIVE_MODE = False  # Change to True in production
-DJSTRIPE_WEBHOOK_SECRET = "whsec_youractualwebhooksecretvalue"
-DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
+STRIPE_TEST_SECRET_KEY = os.getenv('STRIPE_TEST_SECRET_KEY', 'sk_test_51OvRGV05WuPFi5Y0zws4itnQOZiOAX8w6KAjZFBnhUwTkfQrNRjlkzxZ0RfFlJqKfJnKwAZSA5koIEdwXthhtuVz0094PjcZiw')
+STRIPE_TEST_PUBLIC_KEY = os.getenv('STRIPE_TEST_PUBLIC_KEY', 'pk_test_51OvRGV05WuPFi5Y0Oe9NaCmpyo8Qb18YU4vDsr8rJIQZstQOXrKvYI0V8iiUfLI6grObw8vopO4OjIk5ba0FXRMD00lyqRJLsX')
 
+# Set to False to use Stripe's test mode
+STRIPE_LIVE_MODE = False
+
+
+# Assign Stripe keys based on the mode
+STRIPE_SECRET_KEY = STRIPE_TEST_SECRET_KEY if not STRIPE_LIVE_MODE else os.getenv('STRIPE_LIVE_SECRET_KEY', '')
+STRIPE_PUBLIC_KEY = STRIPE_TEST_PUBLIC_KEY if not STRIPE_LIVE_MODE else os.getenv('STRIPE_LIVE_PUBLIC_KEY', '')
+
+# dj-stripe settings
+#DJSTRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'your_stripe_webhook_secret_for_test')
+DJSTRIPE_USE_NATIVE_JSONFIELD = True
+#DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
+DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
