@@ -100,3 +100,31 @@ class ProfileImageForm(forms.ModelForm):
     class Meta:
             model = Profile
             fields = ['images']
+
+PAYMENT_CHOICES = [
+    ('S', 'Stripe'),
+    ('P', 'PayPal'),
+    # Add other payment options here if needed
+]
+
+class CheckoutForm(forms.Form):
+    street_address = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': '1234 Main St',
+        'class': 'form-control'
+    }))
+    apartment_address = forms.CharField(required=False, widget=forms.TextInput(attrs={
+        'placeholder': 'Apartment or suite',
+        'class': 'form-control'
+    }))
+    country = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Country',
+        'class': 'form-control'
+    }))
+    zip = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Zip code',
+        'class': 'form-control'
+    }))
+    same_shipping_address = forms.BooleanField(required=False)
+    save_info = forms.BooleanField(required=False)
+    payment_option = forms.ChoiceField(
+        widget=forms.RadioSelect, choices=PAYMENT_CHOICES)

@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from sneaksbid import views
-from sneaksbid.views import HomeView, shop, ShoeCreateView
+from sneaksbid.views import HomeView, shop, ShoeCreateView,CheckoutView,Payment
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,12 +31,15 @@ urlpatterns = [
     path('shop/', views.shop, name='shop'),
     path('item/<int:item_id>/', views.item_detail, name='item_detail'),
     path('item/<int:item_id>/bid/', views.place_bid, name='place_bid'),
-    path('payment/', views.payment, name='payment'),
+    #path('payment/', views.payment, name='payment'),
     path('process_payment/<str:client_secret>/', views.process_payment, name='process_payment'),
     path('add-shoe/', ShoeCreateView.as_view(), name='add_shoe'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('search/', views.search_sneakers, name='search_sneakers'),
 
+   # path('checkout/', CheckoutView.as_view(), name='checkout'),
+    path('checkout/', CheckoutView.as_view(), name='checkout'),
+   # path('checkout/success/', checkout_success_view, name='checkout_success'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

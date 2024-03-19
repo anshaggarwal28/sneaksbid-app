@@ -20,12 +20,21 @@ from .tokens import generate_token
 from decimal import Decimal
 from django.conf import settings
 from .forms import SignUpForm, ShoeForm
-from .forms import SignInForm
+from .forms import SignInForm,CheckoutForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import PaymentForm, BidForm
-from .models import Payment, Shoe
+from .models import Payment, Shoe,Order,BillingAddress
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+from .models import Item
+from django.db.models import F
+from django.utils import timezone
+from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
+
 
 '''class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
@@ -195,8 +204,8 @@ def item_detail(request, item_id):
 def place_bid(request, item_id):
     item = get_object_or_404(Item, id=item_id)
 
-    if not item.available or not item.is_auction_active:
-        messages.error(request, "The auction is not currently active or the item is not available.")
+    if not item.available:
+        messages.error(request, "The item is not available.")
         return redirect('item_detail', item_id=item.id)
 
     if request.method == 'POST':
@@ -216,38 +225,56 @@ def place_bid(request, item_id):
             bid.user = request.user
             bid.save()
             messages.success(request, "Bid placed successfully.")
+
             return redirect('item_detail', item_id=item.id)
         else:
             messages.error(request, "There was a problem with your bid.")
     else:
         form = BidForm(item=item)
 
-    return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item})
+    user_won_auction = False
+    if not item.is_auction_active:
+        highest_bid = item.bids.order_by('-bid_amount').first()
+        if highest_bid and highest_bid.user == request.user:
+            user_won_auction = True
+
+    return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item, 'user_won_auction': user_won_auction})
 
 
-def payment(request):
-    form = PaymentForm(request.POST or None)
+from .models import Bid
 
-    if request.method == "POST":
+class CheckoutView(View):
+    def get(self, request, *args, **kwargs):
+        # Retrieve winning bid details for the current user
+        winning_bids = Bid.objects.filter(user=request.user, is_winner=True)
+        
+        # Pass bid details to the template for rendering the checkout form
+        context = {'winning_bids': winning_bids}
+        return render(request, 'sneaksbid/checkout.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = CheckoutForm(request.POST)
         if form.is_valid():
-            payment = form.save(commit=False)
-            payment.user = request.user
-            payment.save()
-
-            # Create a Stripe PaymentIntent
-            stripe.api_key = settings.STRIPE_PRIVATE_KEY
-            intent = stripe.PaymentIntent.create(
-                amount=int(payment.amount * 100),
-                currency='usd',
-                metadata={'payment_id': payment.id}
+            # Process the form data and save it to the database
+            billing_address = BillingAddress(
+                user=request.user,
+                street_address=form.cleaned_data.get('street_address'),
+                apartment_address=form.cleaned_data.get('apartment_address'),
+                country=form.cleaned_data.get('country'),
+                zip_code=form.cleaned_data.get('zip'),
+                same_shipping_address=form.cleaned_data.get('same_shipping_address'),
+                save_info=form.cleaned_data.get('save_info'),
+                payment_option=form.cleaned_data.get('payment_option')
             )
+            billing_address.save()
 
-            # Redirect to the payment processing view
-            return redirect('process_payment', intent.client_secret)
+            # Redirect to a different URL upon successful checkout
+            return HttpResponseRedirect(reverse('home'))
 
-    context = {'form': form}
-    return render(request, './sneaksbid/payment.html', context)
-
+        # If form is not valid, render the checkout form again with error messages
+        context = {'form': form}
+        return render(request, 'sneaksbid/checkout.html', context)
+    
 
 def process_payment(request, client_secret):
     if request.method == "POST":
@@ -262,7 +289,7 @@ def process_payment(request, client_secret):
             payment.save()
 
             messages.success(request, 'Payment successful!')
-            return redirect('success')
+            return redirect('home')
 
     context = {'client_secret': client_secret}
     return render(request, './sneaksbid/process_payment.html', context)
