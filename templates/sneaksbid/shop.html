@@ -104,7 +104,6 @@
 	{% for sneaker in sneakers %}
 		<div class="sneaker">
 			<img src="{{ sneaker.image.url }}" alt="{{ sneaker.title }}">
-			<div class="sneaker-overlay"></div>
 				<h3>{{ sneaker.title }}</h3>
 				<p>Description: {{ sneaker.description }}</p>
 				<p>Price: ${{ sneaker.base_price }}</p>

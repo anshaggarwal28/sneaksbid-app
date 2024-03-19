@@ -27,6 +27,14 @@ from .forms import PaymentForm, BidForm
 from .models import Payment, Shoe
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+'''class HomeView(ListView):
+    template_name = "./sneaksbid/homepage.html"
+    context_object_name = 'items'
+    ordering = ['-bid_expiry']
+
+    def get_queryset(self):
+        return Item.objects.all()'''
+
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
     context_object_name = 'items'
@@ -34,6 +42,22 @@ class HomeView(ListView):
 
     def get_queryset(self):
         return Item.objects.all()
+
+    def dispatch(self, request, *args, **kwargs):
+        # Initialize or increment the visit count in the session
+        if 'visit_count' in request.session:
+            request.session['visit_count'] += 1
+        else:
+            request.session['visit_count'] = 1
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Include visit count in the context
+        context['visit_count'] = self.request.session['visit_count']
+        return context
+    
 
 def signin(request):
     if request.method == 'POST':
