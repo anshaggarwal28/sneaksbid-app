@@ -199,13 +199,14 @@ def item_detail(request, item_id):
     # Your existing code to get the item
     item = get_object_or_404(Item, pk=item_id)
     is_auction_active = item.is_auction_active
-    winning_bid = item.bids.filter(is_winner=True).first()  # Get the winning bid here
-
+    winning_bid = item.bids.filter(is_winner=True).first()
+    last_10_bids = item.bids.all().order_by('-bid_time')[:10]
     # Pass 'winning_bid' to the template context
     context = {
         'item': item,
         'is_auction_active': is_auction_active,
         'winning_bid': winning_bid,
+        'last_10_bids': last_10_bids,
         # ... other context variables ...
     }
 

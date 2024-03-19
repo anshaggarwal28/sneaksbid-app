@@ -1,25 +1,86 @@
 {% extends './base.html' %}
 
 {% block content %}
+<style>
+    .item-details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .featured-img {
+        max-width: 300px; /* Set maximum width for the shoe image */
+        height: auto; /* Maintain aspect ratio */
+        margin-bottom: 20px;
+    }
+
+    #bidding-history-chart {
+        max-width: 800px; /* Set maximum width for the graph */
+        height: 400px; /* Set fixed height for the graph */
+        margin-top: 20px;
+    }
+
+    /* Apply same styling to the bid form */
+    .bid-form {
+        margin-top: 20px;
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .bid-form label {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .bid-form input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .bid-form button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .bid-form button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
 <div class="item-details">
     <img src="{{ item.image.url }}" alt="{{ item.title }}" class="featured-img">
     <h2>{{ item.title }}</h2>
     <p>Description: {{ item.description }}</p>
-    
+
     <!-- Display Current Bid -->
     {% if item.bids.all %}
         <p>Current Bid: ${{ item.bids.last.bid_amount }}</p>
     {% else %}
         <p>Base Price: ${{ item.base_price }}</p>
     {% endif %}
-        {% if user.is_authenticated %}
-    {% if item.is_auction_active %}
-        <p>Auction is currently active!</p>
-            <form method="post" action="">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Place Bid</button>
-            </form>
+
+    {% if user.is_authenticated %}
+        {% if item.is_auction_active %}
+            <p>Auction is currently active!</p>
+            <div class="bid-form">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Place Bid</button>
+                </form>
+            </div>
         {% else %}
             <p>You need to <a href="{% url 'login' %}?next={{ request.path }}">login</a> to place a bid.</p>
         {% endif %}

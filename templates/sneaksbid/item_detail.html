@@ -52,12 +52,12 @@
 {% endif %}
     <h3>Last 10 Bids:</h3>
     <ul>
-        {% for bid in item.bids.all|slice:"-10:" %} {# Slice to get last 10 bids #}
-            <li>Bid Amount: ${{ bid.bid_amount }}, Bidder: {{ bid.user.username }}, Time: {{ bid.bid_time|date:"M d"  }}</li>
-        {% empty %}
-            <li>No bids placed yet.</li>
-        {% endfor %}
-    </ul>
+    {% for bid in last_10_bids %}
+        <li>Bid Amount: ${{ bid.bid_amount }}, Bidder: {{ bid.user.username }}, Time: {{ bid.bid_time|date:"M d" }}</li>
+    {% empty %}
+        <li>No bids placed yet.</li>
+    {% endfor %}
+</ul>
 
     <!-- Graph of Bidding History -->
     <canvas id="bidding-history-chart"></canvas>

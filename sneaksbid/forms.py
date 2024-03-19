@@ -103,7 +103,7 @@ class ProfileImageForm(forms.ModelForm):
 
 PAYMENT_CHOICES = [
     ('S', 'Stripe'),
-    ('P', 'PayPal'),
+
     # Add other payment options here if needed
 ]
 
