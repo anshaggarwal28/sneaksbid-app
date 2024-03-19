@@ -12,10 +12,9 @@
     {% else %}
         <p>Base Price: ${{ item.base_price }}</p>
     {% endif %}
-
+        {% if user.is_authenticated %}
     {% if item.is_auction_active %}
         <p>Auction is currently active!</p>
-        {% if user.is_authenticated %}
             <form method="post" action="">
                 {% csrf_token %}
                 {{ form.as_p }}
@@ -26,12 +25,16 @@
         {% endif %}
     {% else %}
         <p>Auction has ended.</p>
-        {% if user_won_auction %}
-            <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+        {% if item.bids.all %}
+            {% for bid in item.bids.all %}
+                {% if bid.is_winner %}
+                    <p>Congratulations! You have won the auction with your bid of ${{ bid.bid_amount }}.</p>
+                    <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+                {% endif %}
+            {% endfor %}
         {% else %}
-            <p>You have lost the auction.</p>
+            <p>No bids were placed for this item.</p>
         {% endif %}
     {% endif %}
 </div>
 {% endblock %}
-

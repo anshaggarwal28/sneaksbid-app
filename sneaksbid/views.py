@@ -24,7 +24,7 @@ from .forms import SignInForm,CheckoutForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import PaymentForm, BidForm
-from .models import Payment, Shoe,Order,BillingAddress
+from .models import Payment, Shoe,Order,BillingAddress, Bid
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -196,9 +196,20 @@ def search_sneakers(request):
 
 
 def item_detail(request, item_id):
-    item = get_object_or_404(Item, id=item_id)
-    return render(request, 'sneaksbid/item_detail.html', {'item': item})
+    # Your existing code to get the item
+    item = get_object_or_404(Item, pk=item_id)
+    is_auction_active = item.is_auction_active
+    winning_bid = item.bids.filter(is_winner=True).first()  # Get the winning bid here
 
+    # Pass 'winning_bid' to the template context
+    context = {
+        'item': item,
+        'is_auction_active': is_auction_active,
+        'winning_bid': winning_bid,
+        # ... other context variables ...
+    }
+
+    return render(request, 'sneaksbid/item_detail.html', context)
 
 @login_required
 def place_bid(request, item_id):
@@ -207,6 +218,8 @@ def place_bid(request, item_id):
     if not item.available:
         messages.error(request, "The item is not available.")
         return redirect('item_detail', item_id=item.id)
+
+    user_won_auction = False
 
     if request.method == 'POST':
         form = BidForm(request.POST, item=item)
@@ -224,32 +237,48 @@ def place_bid(request, item_id):
             bid.item = item
             bid.user = request.user
             bid.save()
+
+            # Update previous winning bid
+            previous_winner = item.bids.filter(is_winner=True).first()
+            if previous_winner:
+                previous_winner.is_winner = False
+                previous_winner.save()
+
+            # Update the winning bid
+            bid.is_winner = True
+            bid.save()
+
             messages.success(request, "Bid placed successfully.")
+
+            # Check if the current user won the auction
+            user_won_auction = item.bids.filter(is_winner=True, user=request.user).exists()
 
             return redirect('item_detail', item_id=item.id)
         else:
             messages.error(request, "There was a problem with your bid.")
     else:
         form = BidForm(item=item)
+    user= User.username
+    context = {
+        'form': form,
+        'item': item,
+        'user_won_auction': user_won_auction,
+        'user' : user,
+    }
 
-    user_won_auction = False
-    if not item.is_auction_active:
-        highest_bid = item.bids.order_by('-bid_amount').first()
-        if highest_bid and highest_bid.user == request.user:
-            user_won_auction = True
-
-    return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item, 'user_won_auction': user_won_auction})
+    return render(request, 'sneaksbid/bid.html', context)
 
 
-from .models import Bid
+
 
 class CheckoutView(View):
     def get(self, request, *args, **kwargs):
         # Retrieve winning bid details for the current user
+        form = CheckoutForm()
         winning_bids = Bid.objects.filter(user=request.user, is_winner=True)
         
         # Pass bid details to the template for rendering the checkout form
-        context = {'winning_bids': winning_bids}
+        context = {'form': form, 'winning_bids': winning_bids}
         return render(request, 'sneaksbid/checkout.html', context)
 
     def post(self, request, *args, **kwargs):

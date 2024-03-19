@@ -33,6 +33,7 @@ class Item(models.Model):
     @property
     def duration_minutes(self):
         return (self.auction_duration.seconds % 3600) // 60
+
     def __str__(self):
         return self.title
 
@@ -42,9 +43,7 @@ class Bid(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     bid_amount = models.DecimalField(max_digits=10, decimal_places=2)
     bid_time = models.DateTimeField(auto_now_add=True)
-
     is_winner = models.BooleanField(default=False)  # Add this field to indicate the winning bid
-
 
     def __str__(self):
         return f"{self.user.username} - {self.bid_amount}"
@@ -67,13 +66,15 @@ class OrderItem(models.Model):
 class BillingAddress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     street_address = models.CharField(max_length=100)
-    apartment_address = models.CharField(max_length=100)
+    apartment_address = models.CharField(max_length=100, blank=True, null=True)
     country = models.CharField(max_length=50)
     zip_code = models.CharField(max_length=100)
+    same_shipping_address = models.BooleanField(default=False)
+    save_info = models.BooleanField(default=False)
+    payment_option = models.CharField(max_length=10)  # Assuming you store the choice as a string
 
     def __str__(self):
         return self.user.username
-
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -110,8 +111,10 @@ class Shoe(Item):
     def __str__(self):
         return f"{self.title} - {self.size}"
 
+
 from django.db import models
 from django.contrib.auth.models import User
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

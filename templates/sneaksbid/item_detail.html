@@ -33,10 +33,23 @@
     {% else %}
         <p>No bids placed yet.</p>
     {% endif %}
+    {% if user.is_authenticated %}
+{% if is_auction_active %}
+<a href="{% url 'place_bid' item_id=item.id %}" class="btn btn-primary">Place Bid</a>
+{% endif %}
+{% endif %}
 <div id="auction-timer-{{ item.id }}" class="auction-timer" data-end-time="{{ item.post_time|date:'c' }}" data-duration-seconds="{{ item.auction_duration.total_seconds }}">
         Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
     </div>
     <!-- List of Last 10 Bids -->
+    {% if not is_auction_active %}
+    <!-- If there is a winning bid, display the winner's username -->
+    {% if winning_bid %}
+        <p>Winner: {{ winning_bid.user.username }}</p>
+    {% else %}
+        <p>No winner for this auction.</p>
+    {% endif %}
+{% endif %}
     <h3>Last 10 Bids:</h3>
     <ul>
         {% for bid in item.bids.all|slice:"-10:" %} {# Slice to get last 10 bids #}
