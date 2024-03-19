@@ -2,11 +2,16 @@
 
 {% block content %}
 <div class="item-details">
-<img src="{{ item.image.url }}" alt="{{ item.title }}" class="featured-img">
+    <img src="{{ item.image.url }}" alt="{{ item.title }}" class="featured-img">
     <h2>{{ item.title }}</h2>
     <p>Description: {{ item.description }}</p>
-    <p>Current Bid: ${{ item.bids.last.bid_amount }}</p>  <!-- Display the current bid, defaulting to the base price -->
-    <p>Base Price: ${{ item.base_price }}</p>  <!-- Display the updated base price -->
+    
+    <!-- Display Current Bid -->
+    {% if item.bids.all %}
+        <p>Current Bid: ${{ item.bids.last.bid_amount }}</p>
+    {% else %}
+        <p>Base Price: ${{ item.base_price }}</p>
+    {% endif %}
 
     {% if item.is_auction_active %}
         <p>Auction is currently active!</p>
@@ -20,7 +25,13 @@
             <p>You need to <a href="{% url 'login' %}?next={{ request.path }}">login</a> to place a bid.</p>
         {% endif %}
     {% else %}
-        <p>Auction has not started or has ended.</p>
+        <p>Auction has ended.</p>
+        {% if user_won_auction %}
+            <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+        {% else %}
+            <p>You have lost the auction.</p>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
+
