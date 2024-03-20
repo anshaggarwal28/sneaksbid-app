@@ -1,0 +1,324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+{% include './header.html' %}
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+    crossorigin="anonymous"
+  />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            {#display: flex;#}
+            {#justify-content: center;#}
+            {#align-items: center;#}
+            height: 100vh;
+        }
+
+        .form-container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 5% 0;
+        }
+
+        .container1 {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            width: 480px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        h3 {
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"]{
+            {#width: calc(100% - 40px);#}
+            width: 100% !important;
+            padding: 12px;
+            border: 1px solid #ddd !important;
+            border-radius: 5px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #4CAF50;
+        }
+
+        button[type="submit"] {
+            width: calc(100% - 40px);
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .fas {
+            margin-right: 10px;
+        }
+
+        .topbar {
+            background-color: white;
+            color: black !important;
+        }
+
+        .topbar a:hover {
+            color: black;
+        }
+        /* header */
+        .header1{
+            height: 125px;
+        }
+
+        .main_menu {
+            list-style-type: none;
+            margin: 0px;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -moz-box;
+            display: -ms-flexbox;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main_menu > li {
+            display: block;
+            position: relative;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .main_menu > li > a {
+            font-family: Montserrat-Regular;
+            font-size: 15px;
+            color: #333333;
+            padding: 0;
+            border-bottom: 1px solid transparent;
+        }
+
+        .container-menu-header{
+            width: 100%;
+            top: 0;
+            left: 0;
+            position: fixed;
+            z-index: 1100;
+        }
+
+        .wrap_header {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        height: 80px;
+        background-color: white;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        -webkit-transition: all 0.3s;
+        -o-transition: all 0.3s;
+        -moz-transition: all 0.3s;
+        transition: all 0.3s;
+        }
+
+        .logo {
+            display: block;
+            position: absolute;
+            left: 52px;
+            top: 50%;
+            -webkit-transform: translateY(-50%);
+            -moz-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            -o-transform: translateY(-50%);
+            transform: translateY(-50%);
+        }
+
+        .wrap_menu {
+            display: flex;
+            justify-content: flex-end;
+        }
+        /* footer */
+        #footer-main{
+	        background: #000;
+	        color: white;
+	        font-size: 0.8rem;
+	        padding: 2.5rem 0;
+            font-family: 'Lato', sans-serif;
+        }
+
+        #footer-main a{
+	        font-size: 14px;
+	        display: block;
+	        margin: 0.3rem;
+	        color: grey;
+        }
+
+        #footer-main a:hover{
+	        font-weight: bold;
+	        color: white;
+        }
+
+        #footer-main h6 a{
+            color: white;
+        }
+
+        #footer-main hr {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border: 0;
+            border-top: 1px solid white;
+        }
+
+        #footer-main img{
+	        margin-right: 0.6rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header1">
+        <!-- Header desktop -->
+        <div class="container-menu-header">
+          <div class="wrap_header">
+            <!-- Logo -->
+            <a href="{% url 'home' %}" class="logo">
+              <p style="color: black"><b style="font-size: 22px">S</b>neaks Bid</p>
+            </a>
+
+            <!-- Menu -->
+            <div class="wrap_menu">
+              <nav class="menu">
+                <ul class="main_menu">
+                  {% if user.is_authenticated %}
+                  <li>
+                    <a href="{% url 'home' %}">Home</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'shop' %}">Shop</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'add_shoe' %}">Sell</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'signout' %}">Logout</a>
+                  </li>
+                  {% else %}
+                  <li>
+                    <a href="{% url 'signin' %}">Sign in</a>
+                  </li>
+                  <li>
+                    <a href="{% url 'signup' %}">Sign up</a>
+                  </li>
+
+                  {% endif %}
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+    </header>
+    {% block content %}
+
+    {% endblock %}
+    <footer id="footer-main">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-3">
+                <br>
+
+                <h6 class="mt-3"><a href="">FIND A STORE</a></h6>
+                <h6 class="mt-3"><a href="">SIGN UP FOR EMAIL</a></h6>
+
+
+                <h6 class="mt-3"><a href="/admin/">ADMIN LOGIN</a></h6>
+
+            </div>
+            <div class="col-sm-3">
+                <h6 class="mt-3"><a href="">GET HELP</a></h6>
+                <a href="">Order Status</a>
+                <a href="">Shipping and Delivery</a>
+                <a href="">Returns</a>
+                <a href="">Payment Options</a>
+                <a href="">Contact Us</a>
+            </div>
+            <div class="col-sm-3">
+                <h6 class="mt-3"><a href="">ABOUT DJANGO</a></h6>
+                <a href="">News</a>
+                <a href="">Careers</a>
+                <a href="">Investors</a>
+                <a href="">Sustainability</a>
+            </div>
+            <div class="col-sm-3">
+              <a href="">Voice of Customer</a>
+              <a href="">Contacts by Branch</a>
+              <a href="">Ethics Reporting</a>
+              <a href="">Careers</a>
+
+              <br><br>
+              <a href="">Business Inquiry</a>
+              <br>
+              <a href="" class="ico"><i class="fab fa-apple fa-2x"></i> Apple Store</a>
+              <a href="" class="ico"><i class="fab fa-google-play fa-2x"></i> Google Play</a>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-sm-6">
+
+            </div>
+            <div class="col-sm-6">
+
+            </div>
+            <hr>
+            <a href="https://github.com/zinmyoswe" style="margin-left: 1rem">Privacy Policy | @zinmyoswe 2019-2020</a>
+          </div>
+        </div>
+    </footer>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
