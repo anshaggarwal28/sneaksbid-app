@@ -12,6 +12,14 @@
     display: flex;
     justify-content: flex-end;
   }
+
+  .userimage img {
+  width: 40px; /* Adjust based on your design needs */
+  height: 40px;
+  border-radius: 50%; /* Circular images */
+  object-fit: cover; /* Ensure the image covers the area */
+  border: 2px solid #f8f8f8; /* Optional: Adds a border around the image */
+}
 </style>
 <!-- Header -->
 <header class="header1">
@@ -37,11 +45,24 @@
             <li>
               <a href="{% url 'add_shoe' %}">Sell</a>
             </li>
-                <li>
-              <a href="{% url 'dashboard' %}">Profile</a>
-            </li>
+
             <li>
               <a href="{% url 'signout' %}">Logout</a>
+            </li>
+             <li>
+              <a href="{% url 'user_history' %}" class="user-history-btn">
+              <i class="fas fa-history"></i> <!-- Font Awesome icon for history -->
+            </a>
+             </li>
+                <li>
+                <div class="userimage" >
+                 {% if request.user.profile.images %}
+                  <a href="{% url 'dashboard' %}">  <img src="{{ request.user.profile.images.url }}" alt="Profile Image" class="avatar"> </a>
+                     </div>
+                {% else %}
+                  <a href="{% url 'dashboard' %}"> Profile </a>
+                {% endif %}
+
             </li>
 
             {% else %}
@@ -52,10 +73,9 @@
               <a href="{% url 'signup' %}">Sign up</a>
             </li>
             {% endif %}
+
             {% if user.is_authenticated %}
-            <a href="{% url 'user_history' %}" class="user-history-btn">
-              <i class="fas fa-history"></i> <!-- Font Awesome icon for history -->
-            </a>
+
             {% endif %}
           </ul>
         </nav>
