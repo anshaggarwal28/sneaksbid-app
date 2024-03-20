@@ -318,6 +318,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 @login_required
 def process_payment(request):
     # Retrieve the user's winning bid amount
+    #test comments
     winning_bid = Bid.objects.filter(user=request.user, is_winner=True).first()
     if not winning_bid:
         messages.error(request, "You do not have any winning bids to pay for.")
