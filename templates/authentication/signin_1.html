@@ -1,0 +1,17 @@
+{% extends '../sneaksbid/header_footer.html' %}
+
+{% block content %}
+    <div class="form-container">
+        <div class="container1">
+            <h3><i class="fas fa-sign-in-alt"></i> Log In to Your Account</h3>
+            <form method="post" action="/signin">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit"><i class="fas fa-lock"></i> Log In</button>
+                <div class="d-flex justify-content-center my-2 links">
+						Forgot Password? <a href="{% url 'reset_password' %}" class="ml-2">Create New</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
