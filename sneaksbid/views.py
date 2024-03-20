@@ -73,9 +73,9 @@ def signin(request):
         form = SignInForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
-            pass1 = form.cleaned_data['pass1']
+            password = form.cleaned_data['password']
 
-            user = authenticate(username=username, password=pass1)
+            user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
                 fname = user.first_name

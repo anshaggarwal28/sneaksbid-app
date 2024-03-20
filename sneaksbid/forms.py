@@ -29,10 +29,10 @@ class SignInForm(forms.Form):
         'id': 'username',
         'required': True
     }))
-    pass1 = forms.CharField(widget=forms.PasswordInput(attrs={
+    password = forms.CharField(widget=forms.PasswordInput(attrs={
         'class': 'form-control',
         'placeholder': 'Enter Your Password',
-        'id': 'pass1',
+        'id': 'password',
         'required': True}))
 
 
