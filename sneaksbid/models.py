@@ -4,6 +4,9 @@ from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
 from djstripe.models import StripeModel
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 
 
 # Create your models here.
@@ -76,6 +79,7 @@ class BillingAddress(models.Model):
     def __str__(self):
         return self.user.username
 
+
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     ordered_items = models.ManyToManyField(OrderItem)
@@ -104,6 +108,7 @@ class Payment2(models.Model):
     def _str_(self):
         return self.user.username
 
+
 class Shoe(Item):
     # Add shoe-specific fields here if needed, for example:
     size = models.CharField(max_length=10)
@@ -123,6 +128,11 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
 
+    @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
         if created:
             Profile.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
