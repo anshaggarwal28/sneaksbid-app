@@ -298,7 +298,7 @@ class CheckoutView(View):
             billing_address.save()
 
             # Redirect to a different URL upon successful checkout
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(reverse('process_payment'))
 
         # If form is not valid, render the checkout form again with error messages
         context = {'form': form}
@@ -317,32 +317,43 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required
 def process_payment(request):
+    # Retrieve the user's winning bid amount
+    #test comments
+    winning_bid = Bid.objects.filter(user=request.user, is_winner=True).first()
+    if not winning_bid:
+        messages.error(request, "You do not have any winning bids to pay for.")
+        return redirect('some_default_route')
+
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
-            # Token is created using Stripe Checkout or Elements!
-            token = request.POST.get('stripeToken')  # Use the name attribute from your Stripe form
+            token = request.POST.get('stripeToken')
             try:
                 charge = stripe.Charge.create(
-                    amount=int(form.cleaned_data['amount'] * 100),  # Amount in cents
+                    amount=int(winning_bid.bid_amount * 100),  # Convert dollars to cents
                     currency='usd',
-                    # description='Example charge',
                     source=token,
                 )
                 Payment2.objects.create(
                     user=request.user,
-                    amount=form.cleaned_data['amount'],
+                    amount=winning_bid.bid_amount,
                     stripe_charge_id=charge.id,
                 )
                 messages.success(request, 'Payment successful!')
+                # Update the winning bid to indicate payment has been made, if necessary
+                winning_bid.paid = True  # Assuming you have a 'paid' field on your Bid model
+                winning_bid.save()
                 return redirect('payment_success')
             except stripe.error.StripeError:
                 messages.error(request, 'Payment error!')
     else:
         form = PaymentForm()
-    return render(request, 'sneaksbid/payment.html',
-                  {'form': form, 'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY})
 
+    return render(request, 'sneaksbid/payment.html', {
+        'form': form,
+        'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
+        'winning_bid_amount': winning_bid.bid_amount  # Pass the winning bid amount to your template if needed
+    })
 
 class ShoeCreateView(LoginRequiredMixin, CreateView):
     model = Shoe
