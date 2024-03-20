@@ -108,15 +108,16 @@
 				<p>Description: {{ sneaker.description }}</p>
 				<p>Price: ${{ sneaker.base_price }}</p>
 				{% if sneaker.is_auction_active %}
+                    				{% if user.is_authenticated %}
+					<a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">Place Bid</a>
 					<p>Auction is active!</p>
+                                    {% endif %}
 						<div id="auction-timer-{{ sneaker.id }}" class="auction-timer" data-end-time="{{ sneaker.post_time|date:'c' }}" data-duration-seconds="{{ sneaker.auction_duration.total_seconds }}">
         Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
     </div>
 				{% else %}
 					<p> Auction is not active</p>
-				{% endif %}
-				{% if user.is_authenticated %}
-					<a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">Place Bid</a>
+                    <a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">View Bid</a>
 				{% endif %}
 		</div>
 	{% endfor %}

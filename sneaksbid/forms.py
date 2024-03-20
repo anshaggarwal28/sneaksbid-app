@@ -37,10 +37,11 @@ class SignInForm(forms.Form):
 
 
 class PaymentForm(forms.Form):
-    amount = forms.DecimalField(decimal_places=2, max_digits=10, widget=forms.NumberInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Amount',
-        }))
+    amount = forms.DecimalField(
+        decimal_places=2,
+        max_digits=10,
+        widget=forms.HiddenInput()  # This will make the field hidden
+    )
 
 class BidForm(forms.ModelForm):
     class Meta:
