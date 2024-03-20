@@ -67,6 +67,18 @@ class HomeView(ListView):
         context['visit_count'] = self.request.session['visit_count']
         return context
 
+def user_history(request):
+    # Retrieve the user's search history from the session
+    search_history = request.session.get('search_history', [])
+    
+    # Retrieve the session count
+    visit_count = request.session.get('visit_count', 0)
+    
+    context = {
+        'visit_count': visit_count,
+        'search_history': search_history,
+    }
+    return render(request, 'sneaksbid/user_history.html', context)
 
 def signin(request):
     if request.method == 'POST':
@@ -192,6 +204,14 @@ def shop(request):
 def search_sneakers(request):
     query = request.GET.get('query')
     search_results = Item.objects.filter(title__icontains=query)
+
+    # Retrieve the user's search history from the session
+    search_history = request.session.get('search_history', [])
+    # Add the current search query to the search history
+    search_history.append(query)
+    # Update the search history in the session
+    request.session['search_history'] = search_history
+    
     return render(request, 'sneaksbid/search_result.html', {'search_results': search_results})
 
 
