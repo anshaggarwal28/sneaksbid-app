@@ -35,7 +35,7 @@ urlpatterns = [
     path('add-shoe/', ShoeCreateView.as_view(), name='add_shoe'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('search/', views.search_sneakers, name='search_sneakers'),
-
+    path('user_history/', views.user_history, name='user_history'),
    # path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
    # path('checkout/success/', checkout_success_view, name='checkout_success'),
