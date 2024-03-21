@@ -23,7 +23,7 @@ from .forms import SignUpForm, ShoeForm
 from .forms import SignInForm, CheckoutForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import PaymentForm, BidForm
+from .forms import PaymentForm, BidForm, Bid
 from .models import Payment2, Shoe, Order, BillingAddress, Bid
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
@@ -85,9 +85,9 @@ def signin(request):
         form = SignInForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
-            pass1 = form.cleaned_data['pass1']
+            password = form.cleaned_data['password']
 
-            user = authenticate(username=username, password=pass1)
+            user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
                 fname = user.first_name
@@ -334,15 +334,111 @@ from .forms import PaymentForm
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+class ShoeCreateView(LoginRequiredMixin, CreateView):
+    model = Shoe
+    form_class = ShoeForm
+    template_name = 'sneaksbid/shoe_form.html'  # Adjust the template path if needed
+    success_url = reverse_lazy('home')
+    login_url = '/signin/'
+
+
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from .forms import UserUpdateForm, ProfileImageForm
+
+
+@login_required
+def dashboard(request):
+    if request.method == 'POST':
+        #user_form = UserUpdateForm(request.POST, instance=request.user)
+        image_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user, request.POST)
+
+        if 'update_profile' in request.POST:
+            if image_form.is_valid():
+                #user_form.save()
+                image_form.save()
+                messages.success(request, 'Your profile has been updated!')
+                return redirect('dashboard')
+
+        if 'change_password' in request.POST:
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request,
+                                         user)  # Important for keeping the user logged in after password change
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Please correct the error below.')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        image_form = ProfileImageForm(instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user)
+
+    context = {
+        #'user_form': user_form,
+        'image_form': image_form,
+        'password_form': password_form
+    }
+
+    return render(request, 'sneaksbid/dashboard.html', context)
+
+
+
+def add_to_cart(request, item_id):
+    # Retrieve the item to be added to the cart
+    item = get_object_or_404(Item, pk=item_id)
+
+    # Retrieve or create the cart items list in the session
+    cart_items = request.session.get('cart_items', [])
+
+    # Check if the item is already in the cart
+    # here we can alter the quantity or not bother at all
+    for cart_item in cart_items:
+        if cart_item['item_id'] == item_id:
+            cart_item['quantity'] += 1
+            break
+    else:
+        # If the item is not in the cart, add it
+        cart_items.append({'item_id': item_id, 'quantity': 1})
+
+    # Save the updated cart items list back to the session
+    request.session['cart_items'] = cart_items
+
+    return redirect('view_cart')
+
+
+@login_required
+def view_cart(request):
+    cart_items = request.session.get('cart_items', [])
+    items = []
+    total_winning_bid = 0
+
+    for cart_item in cart_items:
+        item = get_object_or_404(Item, pk=cart_item['item_id'])
+        winning_bid = item.bids.filter(is_winner=True).first()
+        if winning_bid:
+            total_winning_bid += winning_bid.bid_amount
+
+        items.append({'item': item, 'quantity': cart_item['quantity'], 'winning_bid': winning_bid})
+
+    # Store the total winning bid in the session
+    request.session['total_winning_bid'] = float(total_winning_bid)
+
+    context = {'items': items, 'total_winning_bid': total_winning_bid}
+    return render(request, 'sneaksbid/cart.html', context)
 
 @login_required
 def process_payment(request):
-    # Retrieve the user's winning bid amount
-    #test comments
-    winning_bid = Bid.objects.filter(user=request.user, is_winner=True).first()
-    if not winning_bid:
+    total_winning_bid = request.session.get('total_winning_bid', 0)
+
+    if total_winning_bid == 0:
         messages.error(request, "You do not have any winning bids to pay for.")
-        return redirect('some_default_route')
+        return redirect('home')
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
@@ -350,19 +446,17 @@ def process_payment(request):
             token = request.POST.get('stripeToken')
             try:
                 charge = stripe.Charge.create(
-                    amount=int(winning_bid.bid_amount * 100),  # Convert dollars to cents
+                    amount=int(total_winning_bid * 100),  # Convert dollars to cents
                     currency='usd',
                     source=token,
                 )
                 Payment2.objects.create(
                     user=request.user,
-                    amount=winning_bid.bid_amount,
+                    amount=total_winning_bid,
                     stripe_charge_id=charge.id,
                 )
                 messages.success(request, 'Payment successful!')
-                # Update the winning bid to indicate payment has been made, if necessary
-                winning_bid.paid = True  # Assuming you have a 'paid' field on your Bid model
-                winning_bid.save()
+                # No need to update the winning_bid since we are not using it anymore
                 return redirect('payment_success')
             except stripe.error.StripeError:
                 messages.error(request, 'Payment error!')
@@ -372,41 +466,5 @@ def process_payment(request):
     return render(request, 'sneaksbid/payment.html', {
         'form': form,
         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
-        'winning_bid_amount': winning_bid.bid_amount  # Pass the winning bid amount to your template if needed
+        'total_winning_bid': total_winning_bid
     })
-
-class ShoeCreateView(LoginRequiredMixin, CreateView):
-    model = Shoe
-    form_class = ShoeForm
-    template_name = 'sneaksbid/shoe_form.html'  # Adjust the template path if needed
-    success_url = reverse_lazy('home')
-    login_url = '/signin/'
-
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .forms import UserUpdateForm, ProfileImageForm
-from .models import Profile
-
-
-@login_required
-def dashboard(request):
-    if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
-        image_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
-
-        if user_form.is_valid() and image_form.is_valid():
-            user_form.save()
-            image_form.save()
-            messages.success(request, f'Your account has been updated!')
-            return redirect('dashboard')
-    else:
-        user_form = UserUpdateForm(instance=request.user)
-        image_form = ProfileImageForm(instance=request.user.profile)
-
-    context = {
-        'user_form': user_form,
-        'image_form': image_form
-    }
-
-    return render(request, 'sneaksbid/dashboard.html', context)
