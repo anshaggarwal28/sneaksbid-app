@@ -342,30 +342,47 @@ class ShoeCreateView(LoginRequiredMixin, CreateView):
     login_url = '/signin/'
 
 
+
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from .forms import UserUpdateForm, ProfileImageForm
-from .models import Profile
 
 
 @login_required
 def dashboard(request):
     if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
+        #user_form = UserUpdateForm(request.POST, instance=request.user)
         image_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user, request.POST)
 
-        if user_form.is_valid() and image_form.is_valid():
-            user_form.save()
-            image_form.save()
-            messages.success(request, f'Your account has been updated!')
-            return redirect('dashboard')
+        if 'update_profile' in request.POST:
+            if image_form.is_valid():
+                #user_form.save()
+                image_form.save()
+                messages.success(request, 'Your profile has been updated!')
+                return redirect('dashboard')
+
+        if 'change_password' in request.POST:
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request,
+                                         user)  # Important for keeping the user logged in after password change
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Please correct the error below.')
     else:
         user_form = UserUpdateForm(instance=request.user)
         image_form = ProfileImageForm(instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user)
 
     context = {
-        'user_form': user_form,
-        'image_form': image_form
+        #'user_form': user_form,
+        'image_form': image_form,
+        'password_form': password_form
     }
 
     return render(request, 'sneaksbid/dashboard.html', context)
