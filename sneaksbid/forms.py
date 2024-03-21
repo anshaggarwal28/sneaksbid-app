@@ -43,6 +43,7 @@ class PaymentForm(forms.Form):
         widget=forms.HiddenInput()  # This will make the field hidden
     )
 
+
 class BidForm(forms.ModelForm):
     class Meta:
         model = Bid
@@ -85,25 +86,25 @@ class ShoeForm(forms.ModelForm):
         return super(ShoeForm, self).save(commit=commit)
 
 
-
 class UserUpdateForm(UserChangeForm):
     email = forms.EmailField()
 
     class Meta:
-     model = User
-     fields = ['username', 'email']
+        model = User
+        fields = ['username', 'email']
+
 
 class ProfileImageForm(forms.ModelForm):
     class Meta:
-            model = Profile
-            fields = ['images']
+        model = Profile
+        fields = ['images']
+
 
 PAYMENT_CHOICES = [
     ('S', 'Stripe'),
 
     # Add other payment options here if needed
 ]
-
 
 
 class CheckoutForm(forms.Form):
@@ -127,7 +128,7 @@ class CheckoutForm(forms.Form):
     save_info = forms.BooleanField(required=False)
     payment_option = forms.ChoiceField(
         widget=forms.RadioSelect, choices=PAYMENT_CHOICES)
-    
-    
+
+
 class CartItemForm(forms.Form):
     quantity = forms.IntegerField(min_value=1, initial=1)
