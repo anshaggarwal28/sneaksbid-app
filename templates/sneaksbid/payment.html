@@ -1,7 +1,7 @@
 {% extends './base.html' %}
 {% block content %}
   <h2>Make a Payment</h2>
-  <p>Your winning bid amount: <strong>${{ winning_bid_amount }}</strong></p> <!-- Display winning bid amount -->
+  <p>Your winning bid amount: <strong>${{ total_winning_bid }}</strong></p> <!-- Display winning bid amount -->
   <script src="https://js.stripe.com/v3/"></script>
  <form method="post" id="payment-form">
     {% csrf_token %}

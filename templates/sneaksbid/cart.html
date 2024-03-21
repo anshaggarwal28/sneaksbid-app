@@ -1,0 +1,97 @@
+{% extends './base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .checkout-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .cart-item {
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        width: 300px;
+    }
+
+    .item-image {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .item-details h2 {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .item-details p {
+        margin: 5px 0;
+    }
+
+    .final-checkout {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .final-checkout a {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .final-checkout a:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="checkout-container">
+    <h2>Your Cart</h2>
+
+    {% if items %}
+        <div class="cart-items">
+            {% for cart_item in items %}
+                <div class="cart-item">
+                    <img src="{{ cart_item.item.image.url }}" alt="{{ cart_item.item.title }}" class="item-image">
+                    <div class="item-details">
+                        <h2>{{ cart_item.item.title }}</h2>
+                        <p>Description: {{ cart_item.item.description }}</p>
+                        <p>Base Price: ${{ cart_item.item.base_price }}</p>
+                        {% if cart_item.item.size %}
+                            <p>Size: {{ cart_item.item.size }}</p>
+                        {% endif %}
+                        {% if cart_item.item.current_bid %}
+                            <p>Current Bid: ${{ cart_item.item.current_bid }}</p>
+                        {% endif %}
+                        {% if cart_item.winning_bid %}
+                            <p>Winning Bid: ${{ cart_item.winning_bid }}</p>
+                        {% endif %}
+                        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="final-checkout">
+            <a href="{% url 'checkout' %}?total={{ total_winning_bid }}" class="btn btn-primary">Final Checkout - Total: ${{ total_winning_bid }}</a>
+        </div>
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -71,7 +71,18 @@
         <p>Base Price: ${{ item.base_price }}</p>
     {% endif %}
 
+    <!-- Check if the user has won the auction -->
+    {% if user_won_auction %}
+        <!-- Display message for winning the auction -->
+        <p>Congratulations! You have won the auction with your bid of ${{ bid.bid_amount }}.</p>
+        
+        <!-- Proceed to Checkout button -->
+        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed Checkout</a>
 
+    
+
+    {% else %}
+        <!-- Display message for ongoing or ended auction -->
         {% if item.is_auction_active %}
             <p>Auction is currently active!</p>
             <div class="bid-form">
@@ -81,20 +92,26 @@
                     <button type="submit">Place Bid</button>
                 </form>
             </div>
-
-{#            <p>You need to <a href="{% url 'signin' %}?next={{ request.path }}">login</a> to place a bid.</p>#}
-
-    {% else %}
-        <p>Auction has ended.</p>
-        {% if item.bids.all %}
-            {% for bid in item.bids.all %}
-                {% if bid.is_winner %}
-                    <p>Congratulations! You have won the auction with your bid of ${{ bid.bid_amount }}.</p>
-                    <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
-                {% endif %}
-            {% endfor %}
         {% else %}
-            <p>No bids were placed for this item.</p>
+            <p>Auction has ended.</p>
+            {% if item.bids.all %}
+                {% for bid in item.bids.all %}
+
+                    {% if bid.is_winner %}
+                        <p>Congratulations! You have won the auction with your bid of ${{ bid.bid_amount }}.</p>
+                        <!-- Proceed to Checkout button -->
+                        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+
+                        <form action="{% url 'add_to_cart' item.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit">Add to Cart</button>
+                        </form>
+                    {% endif %}
+
+                {% endfor %}
+            {% else %}
+                <p>No bids were placed for this item.</p>
+            {% endif %}
         {% endif %}
     {% endif %}
 </div>
