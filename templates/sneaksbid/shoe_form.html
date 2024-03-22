@@ -1,26 +1,30 @@
 {% extends './base.html' %}
 
 {% block content %}
+    {% load static %}
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f4f4;
+    background-image: url({% static 'images/bg1.jpeg' %}); /* Add your background image URL here */
+    background-size: cover;
+    background-repeat: no-repeat;
     margin: 0;
     padding: 0;
   }
   .form-header {
-    background-color: #4CAF50;
+    background-color: black; /* Change header background color to black */
     color: white;
     padding: 1rem;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     text-align: center;
     margin-bottom: 2rem;
+    opacity: 0.9; /* Set header opacity */
   }
   .form-container {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.7); /* Set form container background color with opacity */
     margin: auto;
-    padding: 2rem;
+    padding: 1rem;
     border: 2px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -32,7 +36,7 @@
   label {
     display: block;
     margin-bottom: .5rem;
-    color: #444;
+    color: #333; /* Darken label color */
     font-weight: bold;
   }
   input[type='text'],
@@ -48,15 +52,17 @@
     border: 1px solid #ccc; /* Always show the border */
     border-radius: 4px;
     box-sizing: border-box;
+    font-weight: bold; /* Make input font bold */
+    color: #333; /* Darken input text color */
   }
   input[type='submit'] {
-    background-color: #0056b3;
+    background-color: #2c3e50; /* Change button background color */
     color: white;
     margin-top: 0;
     border: none;
   }
   input[type='submit']:hover {
-    background-color: #004494;
+    background-color: #1a252f; /* Change button background color on hover */
   }
   input[type='file'] {
     border: none;
