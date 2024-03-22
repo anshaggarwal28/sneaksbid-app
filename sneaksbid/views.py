@@ -417,6 +417,7 @@ def view_cart(request):
     cart_items = request.session.get('cart_items', [])
     items = []
     total_winning_bid = 0
+    logged_in_user_name = request.user.username
 
     for cart_item in cart_items:
         item = get_object_or_404(Item, pk=cart_item['item_id'])
@@ -429,7 +430,7 @@ def view_cart(request):
     # Store the total winning bid in the session
     request.session['total_winning_bid'] = float(total_winning_bid)
 
-    context = {'items': items, 'total_winning_bid': total_winning_bid}
+    context = {'items': items, 'total_winning_bid': total_winning_bid, 'logged_in_user_name': logged_in_user_name}
     return render(request, 'sneaksbid/cart.html', context)
 
 @login_required
