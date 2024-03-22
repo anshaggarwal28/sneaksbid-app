@@ -29,6 +29,5 @@
   "env": {
     "DJANGO_SETTINGS_MODULE": "sneaksbid-app.settings"
 
-  },
-  "regions": ["all"]
+  }
 }
