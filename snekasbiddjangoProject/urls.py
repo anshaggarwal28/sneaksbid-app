@@ -19,10 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from sneaksbid import views
-from sneaksbid.views import HomeView, shop, ShoeCreateView,CheckoutView,Payment
-from django.contrib.auth import views as auth_views
-
-
+from sneaksbid.views import HomeView, shop, ShoeCreateView,CheckoutView, add_to_cart,view_cart
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
@@ -33,21 +30,25 @@ urlpatterns = [
     path('shop/', views.shop, name='shop'),
     path('item/<int:item_id>/', views.item_detail, name='item_detail'),
     path('item/<int:item_id>/bid/', views.place_bid, name='place_bid'),
-    #path('payment/', views.payment, name='payment'),
-    path('process_payment/<str:client_secret>/', views.process_payment, name='process_payment'),
+    path('payment/', views.process_payment, name='process_payment'),
     path('add-shoe/', ShoeCreateView.as_view(), name='add_shoe'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('search/', views.search_sneakers, name='search_sneakers'),
-
+    path('user_history/', views.user_history, name='user_history'),
    # path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
    # path('checkout/success/', checkout_success_view, name='checkout_success'),
 
-    # Forgot Password
-    path('reset_password/', auth_views.PasswordResetView.as_view(template_name='authentication/password_reset.html'), name="reset_password"),
-    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(template_name='authentication/password_reset_sent.html'), name="password_reset_done"),
-    path('reset/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(template_name='authentication/password_reset_form.html'), name="password_reset_confirm"),
-    path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(template_name='authentication/password_reset_done.html'), name="password_reset_complete")
+    path('add-to-cart/<int:item_id>/', views.add_to_cart, name='add_to_cart'),
+    path('view-cart/', views.view_cart, name='view_cart'),
+  #  path('remove/<int:cart_item_id>/', views.remove_from_cart, name='remove_cart'),
+    path('payment/<total_winning_bid>/', views.process_payment, name='process_payment'),
+
+    path('add_brand/', views.add_brand, name='add_brand')
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
