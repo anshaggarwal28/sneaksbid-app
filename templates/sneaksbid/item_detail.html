@@ -5,30 +5,30 @@
 <style>
     .flex-container {
         display: flex;
-        justify-content: center; /* Center everything on the page */
-        align-items: flex-start; /* Align items to start from the top */
-        flex-wrap: wrap; /* Allow items to wrap to the next line */
-        gap: 30px; /* Spacing between items */
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 30px;
         padding-top: 20px;
     }
 
     .shoe-image {
-        flex-basis: auto; /* Adjust width automatically based on image size */
-        max-width: 400px; /* Maximum width of the shoe image */
+        flex-basis: auto;
+        max-width: 400px;
         border-radius: 4px;
     }
 
     .item-details {
-        flex-grow: 1; /* Take up remaining space */
-        flex-basis: calc(50% - 30px); /* Half the container width minus half the gap */
-        max-width: 600px; /* Maximum width of the card */
+        flex-grow: 1;
+        flex-basis: calc(50% - 30px);
+        max-width: 600px;
         background: #FFFFFF;
         padding: 20px;
         border-radius: 4px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
-        gap: 10px; /* Spacing between inner items */
+        gap: 10px;
     }
 
     .btn {
@@ -40,8 +40,8 @@
         cursor: pointer;
         text-decoration: none;
         text-align: center;
-        width: 50%; /* Allow the button to size according to its content */
-        margin-top: auto; /* Pushes the button to the bottom of the card */
+        width: 50%;
+        margin-top: auto;
     }
 
     .btn:hover {
@@ -50,16 +50,16 @@
     }
 
     .graph-container {
-    width: 100%; /* Full width to center the chart */
+    width: 100%;
     display: flex;
-    justify-content: center; /* Center the chart horizontally */
+    justify-content: center;
     padding: 20px;
     }
 
     #bidding-history-chart {
-        width: 50%; /* Reduced width */
-        max-width: 700px; /* Set a max-width to prevent it from becoming too large */
-        height: 300px; /* Reduced height */
+        width: 50%;
+        max-width: 700px;
+        height: 300px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         border-radius: 4px;
     }
@@ -103,7 +103,6 @@
     </div>
 </div>
 
-<!-- Bidding History Graph -->
 <div class="graph-container">
     <canvas id="bidding-history-chart"></canvas>
 </div>
@@ -123,40 +122,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (timeLeft < 0) {
                 timer.innerHTML = "Auction ended";
-                clearInterval(interval); // Stop updating when the auction ends
+                clearInterval(interval);
                 return;
             }
 
-            // Calculate days, hours, minutes, and seconds
             let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
             let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-            // Update the timer's content
             timer.innerHTML = `Auction ends in approximately ${days}d ${hours}h ${minutes}m ${seconds}s`;
         };
 
-        // Update the countdown every second
-        updateCountdown(); // Update immediately to avoid delay
+        updateCountdown();
         const interval = setInterval(updateCountdown, 1000);
     });
 });
 </script>
-<!-- Include script to render bidding history graph using Chart.js -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     var ctx = document.getElementById('bidding-history-chart').getContext('2d');
 var chart = new Chart(ctx, {
     type: 'line',
     data: {
-            labels: [{% for bid in item.bids.all|slice:"-10:" %}"{{ bid.bid_time|date:"M d" }}",{% endfor %}], // Use bid times as labels
+            labels: [{% for bid in item.bids.all|slice:"-10:" %}"{{ bid.bid_time|date:"M d" }}",{% endfor %}],
             datasets: [{
                 label: 'Bidding History',
-                data: [{% for bid in item.bids.all|slice:"-10:" %}{{ bid.bid_amount }},{% endfor %}], // Use bid amounts backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                data: [{% for bid in item.bids.all|slice:"-10:" %}{{ bid.bid_amount }},{% endfor %}],
                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 4, // Increased line thickness for visibility
+            borderWidth: 4,
             pointBackgroundColor: 'rgba(255, 99, 132, 1)',
             pointBorderColor: '#fff',
             pointHoverBackgroundColor: '#fff',
@@ -196,14 +192,14 @@ var chart = new Chart(ctx, {
         },
          elements: {
             point: {
-                radius: 7, // Increase point radius to make the circles larger
-                borderWidth: 2, // Increase border width of the points for visibility
+                radius: 7,
+                borderWidth: 2,
             }
         },
         legend: {
             display: true,
             labels: {
-                // Increase font size for legend labels
+
                 fontSize: 14,   
                 fontColor: 'rgba(0, 0, 0, 0.7)'
             }

@@ -1,14 +1,10 @@
 from datetime import timedelta
 from decimal import Decimal
-from django import forms
 from django.contrib.auth.forms import UserChangeForm
-from django.contrib.auth.models import User
 from .models import Profile
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from werkzeug.routing import ValidationError
-
 from .models import Payment2, Bid, Shoe
 
 
@@ -40,7 +36,7 @@ class PaymentForm(forms.Form):
     amount = forms.DecimalField(
         decimal_places=2,
         max_digits=10,
-        widget=forms.HiddenInput()  # This will make the field hidden
+        widget=forms.HiddenInput()
     )
 
 
@@ -70,19 +66,14 @@ class ShoeForm(forms.ModelForm):
         fields = ['title', 'description', 'base_price', 'image', 'size']
 
     def save(self, commit=True):
-        # Before saving the Shoe model instance, calculate the auction_duration
-        # from the provided days, hours, and minutes.
         days = self.cleaned_data.get('auction_duration_days', 0)
         hours = self.cleaned_data.get('auction_duration_hours', 0)
         minutes = self.cleaned_data.get('auction_duration_minutes', 0)
 
-        # Calculate the total duration
         total_duration = timedelta(days=days, hours=hours, minutes=minutes)
 
-        # Set the auction_duration on the model instance
         self.instance.auction_duration = total_duration
 
-        # Now save the model instance
         return super(ShoeForm, self).save(commit=commit)
 
 
@@ -103,7 +94,6 @@ class ProfileImageForm(forms.ModelForm):
 PAYMENT_CHOICES = [
     ('S', 'Stripe'),
 
-    # Add other payment options here if needed
 ]
 
 
