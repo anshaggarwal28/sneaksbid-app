@@ -281,11 +281,15 @@ def place_bid(request, item_id):
     else:
         form = BidForm(item=item)
     user = User.username
+
+    winning_bid = item.bids.filter(is_winner=True, user=request.user).first()
+
     context = {
         'form': form,
         'item': item,
         'user_won_auction': user_won_auction,
         'user': user,
+        'winning_bid': winning_bid,
     }
 
     return render(request, 'sneaksbid/bid.html', context)
