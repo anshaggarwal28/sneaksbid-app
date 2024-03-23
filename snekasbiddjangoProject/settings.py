@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-
 from sneaksbid.info import *
 
 EMAIL_USE_TLS = EMAIL_USE_TLS
@@ -34,7 +33,7 @@ SECRET_KEY = 'django-insecure--=f2u3cv!*(960d8-1)errc5t7_ntcq4y&4%av6hb1nv6#z_b=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app', '.now.sh', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 
@@ -101,14 +100,24 @@ WSGI_APPLICATION = 'snekasbiddjangoProject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': 'postgres',
+#         'PASSWORD': 'bvofwmEjWiNzlAzBovGYzUvcizfAYgdG',
+#         'HOST': 'viaduct.proxy.rlwy.net',
+#         'PORT': '51602',
+#     }
+# }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, 'db.sqlite3')
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -154,6 +163,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media_root')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import os
-# STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
