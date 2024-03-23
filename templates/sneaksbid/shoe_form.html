@@ -11,20 +11,6 @@
     margin: 0;
     padding: 0;
   }
-  @media (max-width: 1892px) {
-  body {
-    min-height: 900px; /* Set minimum height to 900px */
-      background-size: 150%;
-      background-position: 50% -7%;
-  }
-}
-   @media (max-width: 1250px) {
-  body {
-    min-height: 900px; /* Set minimum height to 900px */
-      background-size: 180%;
-      background-position: 50% -7%;
-  }
-}
   .form-header {
     background-color: black; /* Change header background color to black */
     color: white;
@@ -100,7 +86,7 @@
     margin-right: 0;
   }
 </style>
-<div class="container">
+
 <div class="form-container">
   <div class="form-header">
     <h2>Add a New Shoe</h2>
@@ -119,6 +105,10 @@
       {{ form.base_price.label_tag }}
       {{ form.base_price }}
     </div>
+      <div>
+          {{ form.brand_name.label_tag }}
+          {{ form.brand_name }}
+      </div>
     <div>
       {{ form.image.label_tag }}
       {{ form.image }}
@@ -146,5 +136,4 @@
     </div>
   </form>
 </div>
-    </div>
 {% endblock %}
