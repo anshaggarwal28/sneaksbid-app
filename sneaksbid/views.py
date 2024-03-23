@@ -469,3 +469,10 @@ def process_payment(request):
         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
         'total_winning_bid': total_winning_bid
     })
+
+
+def aboutus(request):
+    return render(request, 'sneaksbid/aboutus.html')
+
+def contactus(request):
+    return render(request, 'sneaksbid/contact-us.html')

@@ -38,12 +38,12 @@ urlpatterns = [
    # path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
    # path('checkout/success/', checkout_success_view, name='checkout_success'),
-
+    path('about/', views.aboutus, name='about'),
     path('add-to-cart/<int:item_id>/', views.add_to_cart, name='add_to_cart'),
     path('view-cart/', views.view_cart, name='view_cart'),
   #  path('remove/<int:cart_item_id>/', views.remove_from_cart, name='remove_cart'),
     path('payment/<total_winning_bid>/', views.process_payment, name='process_payment'),
-
+    path('contact/', views.contactus, name='contact'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -45,7 +45,8 @@
     }
 
     .btn:hover {
-        background-color: #333;
+        background-color: #000000a6;
+        color: #fff;
     }
 
     .graph-container {
@@ -94,7 +95,7 @@
         <div id="auction-timer-{{ item.id }}" class="auction-timer" data-end-time="{{ item.post_time|date:'c' }}" data-duration-seconds="{{ item.auction_duration.total_seconds }}">
             Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
         </div>
-        {% if not is_auction_active and winning_bid %}
+        {% if not is_auction_active  %}
             <p>Winner: {{ winning_bid.user.username }}</p>
             <a href="{% url 'place_bid' item_id=item.id %}" class="btn">View Bid details</a>
 
@@ -172,6 +173,7 @@ var chart = new Chart(ctx, {
                     stepSize: 1,
                     // Increase font size for y-axis ticks
                     fontSize: 14,
+                    fontWeight: 800,
                     // Custom formatting can go here if needed
                     callback: function(value, index, values) {
                         return value;
@@ -184,12 +186,19 @@ var chart = new Chart(ctx, {
             xAxes: [{
                 ticks: {
                     // Increase font size for x-axis ticks
-                    fontSize: 14
+                    fontSize: 14,
+                    fontWeight: 800
                 },
                 gridLines: {
                     color: 'rgba(0, 0, 0, 0)'
                 }
             }]
+        },
+         elements: {
+            point: {
+                radius: 7, // Increase point radius to make the circles larger
+                borderWidth: 2, // Increase border width of the points for visibility
+            }
         },
         legend: {
             display: true,

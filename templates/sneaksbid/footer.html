@@ -34,7 +34,10 @@
     
 }
 
-
+.container1 {
+        display: flex;
+    justify-content: center;
+}
 
 #footer-main hr {
     margin-top: 1rem;
@@ -49,8 +52,10 @@
 </style>
 
 <footer id="footer-main">
-    <div class="container">
+    <div class="container1">
         <a href="https://github.com/sneaksbid/sneaksbid-app" style="margin-left: 1rem"> Sneaksbid | 2024</a>
+        <a href="{% url 'about' %}"  style="margin-left: 1rem"> About us</a>
+        <a href="{% url 'contact' %}"  style="margin-left: 1rem"> Contact us</a>
     </div>
   </footer>
 <!-- ------------------------------footer end---------------------------------- -->
