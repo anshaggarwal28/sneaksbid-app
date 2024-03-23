@@ -47,14 +47,25 @@
           Unlock the deals Now
         </span>
         <!-- Footer -->
+           {% if user.is_authenticated %}
         <span
           class="caption1-slide1 m-text1 t-center m-b-15"
           style="position: absolute; bottom: 0; width: 100%"
           data-appear="rollIn"
         >
+          Dive into the world of exclusive sneaker auctions.
+        </span>
+               {% else %}
+                 <span
+                      class="caption1-slide1 m-text1 t-center m-b-15"
+                      style="position: absolute; bottom: 0; width: 100%"
+                      data-appear="rollIn"
+                    >
           Dive into the world of exclusive sneaker auctions. Sign up or log in
           now to get started
         </span>
+          {% endif %}
+
       </div>
     </div>
   </div>
