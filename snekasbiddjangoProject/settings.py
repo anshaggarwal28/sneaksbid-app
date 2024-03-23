@@ -19,6 +19,7 @@ EMAIL_HOST = EMAIL_HOST
 EMAIL_HOST_USER = EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
 EMAIL_PORT = EMAIL_PORT
+EMAIL_BACKEND = EMAIL_BACKEND
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,7 +35,7 @@ SECRET_KEY = 'django-insecure--=f2u3cv!*(960d8-1)errc5t7_ntcq4y&4%av6hb1nv6#z_b=
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
+LOGIN_URL = 'signin'
 
 
 INSTALLED_APPS = [

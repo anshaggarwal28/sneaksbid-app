@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from sneaksbid import views
+from django.contrib.auth import views as auth_views
 from sneaksbid.views import HomeView, shop, ShoeCreateView,CheckoutView, add_to_cart,view_cart
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,6 +42,10 @@ urlpatterns = [
     path('about/', views.aboutus, name='about'),
     path('add-to-cart/<int:item_id>/', views.add_to_cart, name='add_to_cart'),
     path('view-cart/', views.view_cart, name='view_cart'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
   #  path('remove/<int:cart_item_id>/', views.remove_from_cart, name='remove_cart'),
     path('payment/<total_winning_bid>/', views.process_payment, name='process_payment'),
     path('contact/', views.contactus, name='contact'),
