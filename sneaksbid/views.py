@@ -19,12 +19,12 @@ from django.contrib.auth import authenticate, login, logout
 from .tokens import generate_token
 from decimal import Decimal
 from django.conf import settings
-from .forms import SignUpForm, ShoeForm
-from .forms import SignInForm,CheckoutForm
+from .forms import SignUpForm, ShoeForm, BrandForm
+from .forms import SignInForm, CheckoutForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import PaymentForm, BidForm
-from .models import Payment, Shoe,Order,BillingAddress
+from .forms import PaymentForm, BidForm, Bid
+from .models import Payment2, Shoe, Order, BillingAddress, Bid, Brand
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -35,6 +35,7 @@ from django.utils import timezone
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 
+from .forms import ShoePriceRangeForm, BrandFilterForm
 
 '''class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
@@ -43,6 +44,7 @@ from django.http import HttpResponseRedirect
 
     def get_queryset(self):
         return Item.objects.all()'''
+
 
 class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
@@ -66,16 +68,30 @@ class HomeView(ListView):
         # Include visit count in the context
         context['visit_count'] = self.request.session['visit_count']
         return context
-    
+
+
+def user_history(request):
+    # Retrieve the user's search history from the session
+    search_history = request.session.get('search_history', [])
+
+    # Retrieve the session count
+    visit_count = request.session.get('visit_count', 0)
+
+    context = {
+        'visit_count': visit_count,
+        'search_history': search_history,
+    }
+    return render(request, 'sneaksbid/user_history.html', context)
+
 
 def signin(request):
     if request.method == 'POST':
         form = SignInForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
-            pass1 = form.cleaned_data['pass1']
+            password = form.cleaned_data['password']
 
-            user = authenticate(username=username, password=pass1)
+            user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
                 fname = user.first_name
@@ -86,7 +102,7 @@ def signin(request):
                 return redirect('home')
     else:
         form = SignInForm()
-    return render(request, "authentication/signin_1.html", {'form': form})
+    return render(request, "authentication/signin.html", {'form': form})
 
 
 def signup(request):
@@ -151,7 +167,7 @@ def signup(request):
             messages.error(request, "Error processing your form.")
     else:
         form = SignUpForm()
-    return render(request, 'authentication/signup_1.html', {'form': form})
+    return render(request, 'authentication/signup.html', {'form': form})
 
 
 def activate(request, uidb64, token):
@@ -181,9 +197,33 @@ def signout(request):
 def shop(request):
     # Retrieve all items from the database
     sneakers = Item.objects.all()
+    brands = Brand.objects.all()
+
+    form1 = ShoePriceRangeForm(request.GET)
+    form2 = BrandFilterForm(request.GET)
+
+
+    if form1.has_changed():
+        if form1.is_valid():
+            minimum_price = form1.cleaned_data['minimum_price']
+            maximum_price = form1.cleaned_data['maximum_price']
+            filtered_products = Item.objects.filter(base_price__range=(minimum_price, maximum_price))
+
+            return render(request, 'sneaksbid/shop.html', {'sneakers': filtered_products, 'form1': form1, 'form2': form2, 'brands': brands})
+
+    if form2.has_changed():
+        if form2.is_valid():
+            selected_brand = form2.cleaned_data['brand']
+            filtered_products = Item.objects.filter(brand_name=selected_brand)
+
+            return render(request, 'sneaksbid/shop.html',{
+                          'sneakers': filtered_products, 'form1': form1, 'form2': form2, 'brands': brands})
 
     context = {
         'sneakers': sneakers,
+        'brands': brands,
+        'form1': form1,
+        'form2': form2
     }
 
     return render(request, 'sneaksbid/shop.html', context)
@@ -192,12 +232,33 @@ def shop(request):
 def search_sneakers(request):
     query = request.GET.get('query')
     search_results = Item.objects.filter(title__icontains=query)
+
+    # Retrieve the user's search history from the session
+    search_history = request.session.get('search_history', [])
+    # Add the current search query to the search history
+    search_history.append(query)
+    # Update the search history in the session
+    request.session['search_history'] = search_history
+
     return render(request, 'sneaksbid/search_result.html', {'search_results': search_results})
 
 
 def item_detail(request, item_id):
-    item = get_object_or_404(Item, id=item_id)
-    return render(request, 'sneaksbid/item_detail.html', {'item': item})
+    # Your existing code to get the item
+    item = get_object_or_404(Item, pk=item_id)
+    is_auction_active = item.is_auction_active
+    winning_bid = item.bids.filter(is_winner=True).first()
+    last_10_bids = item.bids.all().order_by('-bid_time')[:10]
+    # Pass 'winning_bid' to the template context
+    context = {
+        'item': item,
+        'is_auction_active': is_auction_active,
+        'winning_bid': winning_bid,
+        'last_10_bids': last_10_bids,
+        # ... other context variables ...
+    }
+
+    return render(request, 'sneaksbid/item_detail.html', context)
 
 
 @login_required
@@ -207,6 +268,8 @@ def place_bid(request, item_id):
     if not item.available:
         messages.error(request, "The item is not available.")
         return redirect('item_detail', item_id=item.id)
+
+    user_won_auction = False
 
     if request.method == 'POST':
         form = BidForm(request.POST, item=item)
@@ -224,32 +287,50 @@ def place_bid(request, item_id):
             bid.item = item
             bid.user = request.user
             bid.save()
+
+            # Update previous winning bid
+            previous_winner = item.bids.filter(is_winner=True).first()
+            if previous_winner:
+                previous_winner.is_winner = False
+                previous_winner.save()
+
+            # Update the winning bid
+            bid.is_winner = True
+            bid.save()
+
             messages.success(request, "Bid placed successfully.")
+
+            # Check if the current user won the auction
+            user_won_auction = item.bids.filter(is_winner=True, user=request.user).exists()
 
             return redirect('item_detail', item_id=item.id)
         else:
             messages.error(request, "There was a problem with your bid.")
     else:
         form = BidForm(item=item)
+    user = User.username
 
-    user_won_auction = False
-    if not item.is_auction_active:
-        highest_bid = item.bids.order_by('-bid_amount').first()
-        if highest_bid and highest_bid.user == request.user:
-            user_won_auction = True
+    winning_bid = item.bids.filter(is_winner=True, user=request.user).first()
 
-    return render(request, 'sneaksbid/bid.html', {'form': form, 'item': item, 'user_won_auction': user_won_auction})
+    context = {
+        'form': form,
+        'item': item,
+        'user_won_auction': user_won_auction,
+        'user': user,
+        'winning_bid': winning_bid,
+    }
 
+    return render(request, 'sneaksbid/bid.html', context)
 
-from .models import Bid
 
 class CheckoutView(View):
     def get(self, request, *args, **kwargs):
         # Retrieve winning bid details for the current user
+        form = CheckoutForm()
         winning_bids = Bid.objects.filter(user=request.user, is_winner=True)
-        
+
         # Pass bid details to the template for rendering the checkout form
-        context = {'winning_bids': winning_bids}
+        context = {'form': form, 'winning_bids': winning_bids}
         return render(request, 'sneaksbid/checkout.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -269,30 +350,21 @@ class CheckoutView(View):
             billing_address.save()
 
             # Redirect to a different URL upon successful checkout
-            return HttpResponseRedirect(reverse('home'))
+            return HttpResponseRedirect(reverse('process_payment'))
 
         # If form is not valid, render the checkout form again with error messages
         context = {'form': form}
         return render(request, 'sneaksbid/checkout.html', context)
-    
 
-def process_payment(request, client_secret):
-    if request.method == "POST":
-        stripe.api_key = settings.STRIPE_PRIVATE_KEY
-        intent = stripe.PaymentIntent.confirm(client_secret)
 
-        if intent.status == 'succeeded':
-            # Update the Payment model
-            payment_id = intent.metadata['payment_id']
-            payment = Payment.objects.get(id=payment_id)
-            payment.paid = True
-            payment.save()
+import stripe
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import PaymentForm
 
-            messages.success(request, 'Payment successful!')
-            return redirect('home')
-
-    context = {'client_secret': client_secret}
-    return render(request, './sneaksbid/process_payment.html', context)
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class ShoeCreateView(LoginRequiredMixin, CreateView):
@@ -302,31 +374,145 @@ class ShoeCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('home')
     login_url = '/signin/'
 
+@login_required
+def add_brand(request):
+    brands = Brand.objects.all();
+
+    if request.method == 'POST':
+        form1 = BrandForm(request.POST)
+        if form1.is_valid():
+            # rand_name = form1.cleaned_data['name']
+            form1.save()
+            messages.success(request, 'New Brand Created Successfully')
+            return redirect('home')
+    else:
+        form1 = BrandForm()
+    return render(request, 'sneaksbid/brand_form.html', {'brands': brands, 'form1': form1})
+
 
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from .forms import UserUpdateForm, ProfileImageForm
-from .models import Profile
 
 
 @login_required
 def dashboard(request):
     if request.method == 'POST':
-        user_form = UserUpdateForm(request.POST, instance=request.user)
+        # user_form = UserUpdateForm(request.POST, instance=request.user)
         image_form = ProfileImageForm(request.POST, request.FILES, instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user, request.POST)
 
-        if user_form.is_valid() and image_form.is_valid():
-            user_form.save()
-            image_form.save()
-            messages.success(request, f'Your account has been updated!')
-            return redirect('dashboard')
+        if 'update_profile' in request.POST:
+            if image_form.is_valid():
+                # user_form.save()
+                image_form.save()
+                messages.success(request, 'Your profile has been updated!')
+                return redirect('dashboard')
+
+        if 'change_password' in request.POST:
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request,
+                                         user)  # Important for keeping the user logged in after password change
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Please correct the error below.')
     else:
         user_form = UserUpdateForm(instance=request.user)
         image_form = ProfileImageForm(instance=request.user.profile)
+        password_form = PasswordChangeForm(request.user)
 
     context = {
-        'user_form': user_form,
-        'image_form': image_form
+        # 'user_form': user_form,
+        'image_form': image_form,
+        'password_form': password_form
     }
 
     return render(request, 'sneaksbid/dashboard.html', context)
+
+
+def add_to_cart(request, item_id):
+    # Retrieve the item to be added to the cart
+    item = get_object_or_404(Item, pk=item_id)
+
+    # Retrieve or create the cart items list in the session
+    cart_items = request.session.get('cart_items', [])
+
+    # Check if the item is already in the cart
+    # here we can alter the quantity or not bother at all
+    for cart_item in cart_items:
+        if cart_item['item_id'] == item_id:
+            cart_item['quantity'] += 1
+            break
+    else:
+        # If the item is not in the cart, add it
+        cart_items.append({'item_id': item_id, 'quantity': 1})
+
+    # Save the updated cart items list back to the session
+    request.session['cart_items'] = cart_items
+
+    return redirect('view_cart')
+
+
+@login_required
+def view_cart(request):
+    cart_items = request.session.get('cart_items', [])
+    items = []
+    total_winning_bid = 0
+    logged_in_user_name = request.user.username
+
+    for cart_item in cart_items:
+        item = get_object_or_404(Item, pk=cart_item['item_id'])
+        winning_bid = item.bids.filter(is_winner=True).first()
+        if winning_bid:
+            total_winning_bid += winning_bid.bid_amount
+
+        items.append({'item': item, 'quantity': cart_item['quantity'], 'winning_bid': winning_bid})
+
+    # Store the total winning bid in the session
+    request.session['total_winning_bid'] = float(total_winning_bid)
+
+    context = {'items': items, 'total_winning_bid': total_winning_bid, 'logged_in_user_name': logged_in_user_name}
+    return render(request, 'sneaksbid/cart.html', context)
+
+
+@login_required
+def process_payment(request):
+    total_winning_bid = request.session.get('total_winning_bid', 0)
+
+    if total_winning_bid == 0:
+        messages.error(request, "You do not have any winning bids to pay for.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            token = request.POST.get('stripeToken')
+            try:
+                charge = stripe.Charge.create(
+                    amount=int(total_winning_bid * 100),  # Convert dollars to cents
+                    currency='usd',
+                    source=token,
+                )
+                Payment2.objects.create(
+                    user=request.user,
+                    amount=total_winning_bid,
+                    stripe_charge_id=charge.id,
+                )
+                messages.success(request, 'Payment successful!')
+                # No need to update the winning_bid since we are not using it anymore
+                return redirect('payment_success')
+            except stripe.error.StripeError:
+                messages.error(request, 'Payment error!')
+    else:
+        form = PaymentForm()
+
+    return render(request, 'sneaksbid/payment.html', {
+        'form': form,
+        'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
+        'total_winning_bid': total_winning_bid
+    })
