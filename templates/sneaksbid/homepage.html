@@ -1,4 +1,6 @@
-{% extends './base.html' %} {% load static %} {% block content %}
+{% extends './base.html' %}
+{% load static %}
+{% block content %}
 <!-- Category start -->
 <style>
   .hov1 {
@@ -94,17 +96,29 @@
             </div>
 
             {% if user.is_authenticated %}
-           <div class="block2-txt p-t-20">
-    <a href="{% url 'item_detail' item_id=item.id %}" class="block2-name dis-block s-text3 p-b-5">{{ item.title }}</a>
-    {% if item.is_auction_active %}
-    <span class="block2-price m-text6 p-r-5">${{ item.base_price }}</span>
-    <div id="auction-timer-{{ item.id }}" class="auction-timer" data-end-time="{{ item.post_time|date:'c' }}" data-duration-seconds="{{ item.auction_duration.total_seconds }}">
-        Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
-    </div>
-    {% else %}
-    <span class="block2-price m-text6 p-r-5">Auction not live</span>
-    {% endif %}
-</div>
+            <div class="block2-txt p-t-20">
+              <a
+                href="{% url 'item_detail' item_id=item.id %}"
+                class="block2-name dis-block s-text3 p-b-5"
+                >{{ item.title }}</a
+              >
+              {% if item.is_auction_active %}
+              <span class="block2-price m-text6 p-r-5"
+                >${{ item.base_price }}</span
+              >
+              <div
+                id="auction-timer-{{ item.id }}"
+                class="auction-timer"
+                data-end-time="{{ item.post_time|date:'c' }}"
+                data-duration-seconds="{{ item.auction_duration.total_seconds }}"
+              >
+                Auction ends in approximately {{ item.duration_days }} days, {{
+                item.duration_hours }} hours, {{ item.duration_minutes }} mins
+              </div>
+              {% else %}
+              <span class="block2-price m-text6 p-r-5">Auction not live</span>
+              {% endif %}
+            </div>
             {%else%}
             <div class="block2-txt p-t-20">
               <span class="block2-name dis-block s-text20 p-b-5"
@@ -129,7 +143,7 @@
 <br /><br />
 
 <!-- Display visit count -->
-<p>You have visited this website {{ visit_count }} times.</p>
+<p style="text-align: center;">You have visited this website {{ visit_count }} times.</p>
 
 <!-- Shipping -->
 <section class="shipping bgwhite p-t-62 p-b-46">
@@ -159,39 +173,44 @@
   </div>
 </section>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const timers = document.querySelectorAll('.auction-timer');
+  document.addEventListener("DOMContentLoaded", function () {
+    const timers = document.querySelectorAll(".auction-timer");
 
-    timers.forEach(function(timer) {
-        const endTime = new Date(timer.getAttribute('data-end-time')).getTime();
-        const durationSeconds = parseInt(timer.getAttribute('data-duration-seconds'), 10);
-        const auctionEndTime = endTime + (durationSeconds * 1000);
+    timers.forEach(function (timer) {
+      const endTime = new Date(timer.getAttribute("data-end-time")).getTime();
+      const durationSeconds = parseInt(
+        timer.getAttribute("data-duration-seconds"),
+        10
+      );
+      const auctionEndTime = endTime + durationSeconds * 1000;
 
-        const updateCountdown = () => {
-            const now = new Date().getTime();
-            const timeLeft = auctionEndTime - now;
+      const updateCountdown = () => {
+        const now = new Date().getTime();
+        const timeLeft = auctionEndTime - now;
 
-            if (timeLeft < 0) {
-                timer.innerHTML = "Auction ended";
-                clearInterval(interval); // Stop updating when the auction ends
-                return;
-            }
+        if (timeLeft < 0) {
+          timer.innerHTML = "Auction ended";
+          clearInterval(interval); // Stop updating when the auction ends
+          return;
+        }
 
-            // Calculate days, hours, minutes, and seconds
-            let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-            let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        // Calculate days, hours, minutes, and seconds
+        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        let hours = Math.floor(
+          (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-            // Update the timer's content
-            timer.innerHTML = `Auction ends in approximately ${days}d ${hours}h ${minutes}m ${seconds}s`;
-        };
+        // Update the timer's content
+        timer.innerHTML = `Auction ends in approximately ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      };
 
-        // Update the countdown every second
-        updateCountdown(); // Update immediately to avoid delay
-        const interval = setInterval(updateCountdown, 1000);
+      // Update the countdown every second
+      updateCountdown(); // Update immediately to avoid delay
+      const interval = setInterval(updateCountdown, 1000);
     });
-});
+  });
 </script>
 
 {% endblock content %}

@@ -55,19 +55,25 @@
               <li><a href="{%url 'view_cart' %}">Cart</a></li>
               <li>
                 <a href="{% url 'user_history' %}" class="user-history-btn">
-                  <i class="fas fa-history"> User History </i> <!-- Font Awesome icon for history -->
+                   User History
                 </a>
               </li>
-              <li><a href="{% url 'signout' %}">Logout</a></li>
+
               <li>
                 <div class="userimage">
                   {% if request.user.profile.images %}
-                    <a href="{% url 'dashboard' %}"><img src="{{ request.user.profile.images.url }}" alt="Profile Image" class="avatar"></a>
+
+                       <a href="{% url 'dashboard' %}"><img src="{{ request.user.profile.images.url }}" alt="Profile Image" class="avatar"></a>
+
+
                   {% else %}
-                    <a href="{% url 'dashboard' %}">Profile</a>
+
+                         <a href="{% url 'dashboard' %}">Profile</a>
+
                   {% endif %}
                 </div>
               </li>
+                 <li><a href="{% url 'signout' %}">Logout</a></li>
             {% else %}
               <li><a href="{% url 'signin' %}">Sign in</a></li>
               <li><a href="{% url 'signup' %}">Sign up</a></li>
