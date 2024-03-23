@@ -288,7 +288,7 @@ def place_bid(request, item_id):
         'form': form,
         'item': item,
         'user_won_auction': user_won_auction,
-        'user': user,
+        'user': request.user,
         'winning_bid': winning_bid,
     }
 
