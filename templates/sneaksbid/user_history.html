@@ -26,28 +26,74 @@
         z-index: -1;
     }
 
-    /* Content container */
+
     .content-container {
+        display: flex;
+        text-align: center;
+        flex-direction: column; 
+        justify-content: space-between; 
+        min-height: 90%;
+        position: relative;
+        z-index: 1; 
+    }
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        margin: auto;
+        width: 50%; /* Adjust the width as needed */
         padding: 20px;
         position: relative;
-        z-index: 1; /* Ensure content is above the background */
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        flex-direction: column;
+        align-items: strech; /* Align items at the start of the card */
     }
+
+    .search-history ul {
+        width: 100%; /* Full width */
+        padding: 0;
+        display: grid;
+        font-weight: 900;
+        grid-template-columns: repeat(4, 1fr); /* Creates a 4-column grid */
+        grid-gap: 10px; /* Adjust the space between grid items */
+        list-style: none;
+    }
+
+    .search-history li {
+        background: #f7f7f7;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center; /* Center content horizontally */
+        align-items: center; /* Center content vertically */
+        height: 50px; /* Or any other fixed height for uniformity */
+    }
+    .sh {
+        margin-bottom: 2%;
+    }
+
 </style>
 
-<div class="background-image"></div> <!-- Background image of blurred sneakers -->
+<div class="background-image"></div> 
 
 <div class="content-container">
-    <h2 class="title">User History</h2> <!-- Centered title with bold -->
-    <div>
-        <p>Session Count: {{ visit_count }}</p>
-        <!-- Add other content here -->
+    <div class="card">
+        <h2 class="title">User History</h2>
+        <p><b>Session Count: {{ visit_count }}</b></p>
         <div class="search-history">
-            <p>Search History:</p>
+            <p class="sh"><b>Search History:</b></p>
             <ul>
                 {% for item in search_history %}
                     <li>{{ item }}</li>
                 {% endfor %}
             </ul>
+        </div>
     </div>
 </div>
 {% endblock %}

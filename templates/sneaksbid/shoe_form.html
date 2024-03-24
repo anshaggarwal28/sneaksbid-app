@@ -5,12 +5,17 @@
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-image: url({% static 'images/bg1.jpeg' %}); /* Add your background image URL here */
-    background-size: cover;
+    background-size: 120%;
+    background-position: 50% -7%;
     background-repeat: no-repeat;
     margin: 0;
     padding: 0;
   }
+  @media (max-width: 1684px) {
+    body {
+      background-size: 160%;
+    }
+}
   .form-header {
     background-color: black; /* Change header background color to black */
     color: white;
@@ -86,7 +91,7 @@
     margin-right: 0;
   }
 </style>
-
+<body style="background-image: url({% static 'images/bg1.jpeg' %});">
 <div class="form-container">
   <div class="form-header">
     <h2>Add a New Shoe</h2>
@@ -136,4 +141,5 @@
     </div>
   </form>
 </div>
+</body>
 {% endblock %}

@@ -1,73 +1,129 @@
 {% extends './base.html' %}
 {% load static %}
 {% block content %}
-    <style>
-        .bg-title-page {
-            /* Your background styles */
-        }
+<style type="text/css">
+.sneaker-images {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around; /* Adjust alignment of items */
+    }
+.btn {
+        background-color: #000;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        width: 50%; /* Allow the button to size according to its content */
+        margin-top: auto; /* Pushes the button to the bottom of the card */
+    }
+   .btn:hover {
+        background-color: #333;
+    }
 
-        .l-text2, .m-text13 {
-            /* Your text styles */
-        }
+.sneaker {
+	width: calc(25% - 20px); /* Set width for each sneaker container */
+	margin-bottom: 20px; /* Add some space between sneakers */
+	text-align: center; /* Center align content */
+	position: relative; /* Position relative for absolute positioning of overlay */
+}
 
-        .search-form {
-            margin-bottom: 20px;
-            text-align: center;
-        }
+.sneaker img {
+	width: 100%; /* Make the image fill the container width */
+	height: auto; /* Maintain aspect ratio */
+	max-height: 200px; /* Set maximum height */
+	transition: transform 0.3s; /* Add transition for smooth effect */
+}
 
-        .search-input {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 5px;
-        }
+.sneaker h3 {
+	margin-top: 10px; /* Add margin to top of title */
+}
 
-        .search-button {
-            padding: 8px 16px;
-            border: none;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+.sneaker:hover img {
+    transform: scale(1.1); /* Scale up the image on hover */
+}
 
-        .search-button:hover {
-            background-color: #45a049;
-        }
+.sneaker-overlay {
+    position: absolute; /* Position absolute for overlay */
+    top: 0; /* Align overlay to the top */
+    left: 0; /* Align overlay to the left */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(246, 242, 242, 0); /* Semi-transparent black background */
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.3s; /* Add transition for smooth effect */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
 
-        .sneaker-images {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            text-align: center;
-            justify-content: center; /* Center the items horizontally */
-            align-items: center; /* Center the items vertically */
-        }
+.sneaker:hover .sneaker-overlay {
+    opacity: 1; /* Show overlay on hover */
+}
 
-        .sneaker {
-            width: calc(33.33% - 100px);
-            margin-bottom: 20px;
-            text-align: center;
-        }
+.sneaker p {
+	margin-bottom: 5px; /* Add margin to bottom of paragraphs */
+}
 
-        .sneaker img {
-            width: 100%;
-            height: auto;
-            max-height: 200px;
-        }
+.sneaker .btn {
+	margin-top: 10px; /* Add margin to top of button */
+}
+.search-form {
+	margin-bottom: 20px;
+	text-align: center;
+}
 
-        .sneaker h3 {
-            margin-top: 10px;
-        }
+input[type='text'], input[type='number'], input[type='password']{
+    border: 1px solid #cecece !important;
+    margin-bottom: 5px;
+}
 
-        .sneaker p {
-            margin-bottom: 5px;
-        }
+.search-input {
+	padding: 8px;
+	border-color:   #4CAF50;
+	border-radius: 4px;
+	margin-right: 5px;
+	margin-top: 10px;
+    border: 1px solid #cecece !important;
+}
 
-        .sneaker .btn {
-            margin-top: 10px;
-        }
-    </style>
+.search-button {
+	padding: 8px 16px;
+	/* border: none; */
+	background-color: #4CAF50;
+    border: 1px solid #4CAF50;
+	color: white;
+    border-radius: 0 4px 4px 0;
+	border-radius: 4px;
+	cursor: pointer;
+    margin-left: -5px;
+}
+
+.search-button:hover {
+	background-color: #45a049;
+}
+
+#brand_filter_button,
+#search_price_button{
+    padding: 8px 16px;
+    border: none;
+    background-color: #4CAF50;
+    border: 1px solid #4CAF50;
+    color: white;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+#id_brand{
+    padding: 8px;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    width: 40%;
+}
+</style>
+
 </head>
 <body>
     <!-- Title Page -->
@@ -96,15 +152,18 @@
                 <p>Description: {{ sneaker.description }}</p>
                 <p>Price: ${{ sneaker.base_price }}</p>
                 {% if sneaker.is_auction_active %}
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">Place Bid</a>
                     <p>Auction is active!</p>
-                        <p>Auction ends in approximately {{ item.auction_duration }} days</p>
+                    {% endif %}
+                        <div id="auction-timer-{{ sneaker.id }}" class="auction-timer" data-end-time="{{ sneaker.post_time|date:'c' }}" data-duration-seconds="{{ sneaker.auction_duration.total_seconds }}">
+        Auction ends in approximately {{ item.duration_days }} days, {{ item.duration_hours }} hours, {{ item.duration_minutes }} mins
+    </div>
                 {% else %}
                     <p>Auction is not active.</p>
+                            <a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">View Bid</a>
                 {% endif %}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'place_bid' item_id=sneaker.id %}" class="btn btn-primary">Place Bid</a>
-                {% endif %}
-            </div>\
+            </div>
             {% endfor %}
         {% else %}
             <p>No search results found.</p>
