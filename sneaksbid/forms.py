@@ -5,7 +5,7 @@ from .models import Profile
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Payment2, Bid, Shoe
+from .models import Payment2, Bid, Shoe, Brand
 
 
 class SignUpForm(UserCreationForm):
@@ -63,7 +63,7 @@ class ShoeForm(forms.ModelForm):
 
     class Meta:
         model = Shoe
-        fields = ['title', 'description', 'base_price', 'image', 'size']
+        fields = ['title', 'description', 'base_price', 'brand_name', 'image', 'size']
 
     def save(self, commit=True):
         days = self.cleaned_data.get('auction_duration_days', 0)
@@ -122,3 +122,36 @@ class CheckoutForm(forms.Form):
 
 class CartItemForm(forms.Form):
     quantity = forms.IntegerField(min_value=1, initial=1)
+
+
+class ShoePriceRangeForm(forms.Form):
+    minimum_price = forms.IntegerField(label='Minimum price', min_value=0, required=False)
+    maximum_price = forms.IntegerField(label='Maximum price', min_value=0, required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        minimum_price = cleaned_data.get('minimum_price')
+        maximum_price = cleaned_data.get('maximum_price')
+
+        if minimum_price and maximum_price and minimum_price > maximum_price:
+            raise forms.ValidationError("Minimum price cannot be greater than maximum price")
+        return cleaned_data
+
+class BrandFilterForm(forms.Form):
+    brand = forms.ModelChoiceField(queryset=Brand.objects.all(), label='Select Brand', required=False)
+
+
+class BrandForm(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = ['name']
+        widgets = {'name': forms.TextInput (attrs={'placeholder':'Enter A New Brand', 'class':'form-control'})}
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+
+        # Check if a brand with the same name already exists
+        if Brand.objects.filter(name=name).exists():
+            raise forms.ValidationError("Brand with this name already exists.")
+
+        return name

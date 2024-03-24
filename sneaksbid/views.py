@@ -24,7 +24,7 @@ from .forms import SignInForm, CheckoutForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import PaymentForm, BidForm, Bid
-from .models import Payment2, Shoe, Order, BillingAddress, Bid
+from .models import Payment2, Shoe, Order, BillingAddress, Bid, Brand
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -34,6 +34,8 @@ from django.db.models import F
 from django.utils import timezone
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
+
+from .forms import ShoePriceRangeForm, BrandFilterForm
 
 '''class HomeView(ListView):
     template_name = "./sneaksbid/homepage.html"
@@ -193,9 +195,32 @@ def signout(request):
 def shop(request):
     # Retrieve all items from the database
     sneakers = Item.objects.all()
+    brands = Brand.objects.all()
+
+    form1 = ShoePriceRangeForm(request.GET)
+    form2 = BrandFilterForm(request.GET)
+
+    if form1.has_changed():
+        if form1.is_valid():
+            minimum_price = form1.cleaned_data['minimum_price']
+            maximum_price = form1.cleaned_data['maximum_price']
+            filtered_products = Item.objects.filter(base_price__range=(minimum_price, maximum_price))
+
+            return render(request, 'sneaksbid/shop.html', {'sneakers': filtered_products, 'form1': form1, 'form2': form2, 'brands': brands})
+
+    if form2.has_changed():
+        if form2.is_valid():
+            selected_brand = form2.cleaned_data['brand']
+            filtered_products = Item.objects.filter(brand_name=selected_brand)
+
+            return render(request, 'sneaksbid/shop.html',{
+                          'sneakers': filtered_products, 'form1': form1, 'form2': form2, 'brands': brands})
 
     context = {
         'sneakers': sneakers,
+        'brands': brands,
+        'form1': form1,
+        'form2': form2
     }
 
     return render(request, 'sneaksbid/shop.html', context)
