@@ -14,7 +14,7 @@
     <style>
       body {
         font-family: 'Roboto', sans-serif;
-        background: url({% static 'images/bg4.webp' %}) no-repeat center center fixed;
+        background: url({% static 'images/bg5.webp' %}) no-repeat center center fixed;
         background-size: cover;
         margin: 0;
         padding: 0;
@@ -34,7 +34,7 @@
     .container {
         max-width: 500px;
         width: 90%; /* Responsive width */
-        margin: 20px auto; /* Add top and bottom margin */
+        margin: 90px auto; /* Add top and bottom margin */
         padding: 20px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         background-color: rgba(255, 255, 255, 0.9);
@@ -65,7 +65,7 @@
     }
 
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 5px;
     }
 
     label {
@@ -99,6 +99,7 @@
         font-size: 16px;
         cursor: pointer;
         text-transform: uppercase;
+        margin-bottom: 20px;
     }
 
     button[type="submit"]:hover {
@@ -128,7 +129,7 @@
                 {% if request.user.profile.images %}
                     <img src="{{ request.user.profile.images.url }}" alt="Profile Image" class="avatar">
                 {% else %}
-                    <img src="{% static 'images/icons/di.png' %}" alt="Default Image" class="avatar">
+                    <img src="{% static 'images/mi.png' %}" alt="Default Image" class="avatar">
                 {% endif %}
             </div>
             <div class="user-info">

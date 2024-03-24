@@ -1,9 +1,8 @@
 
 db.sqlite3
-*.jpeg
+
 *.sqlite3
-*.png
+
 *.sqlite3
-.idea/misc.xml
-.idea/snekasbiddjangoProject.iml
+
 db.sqlite3
