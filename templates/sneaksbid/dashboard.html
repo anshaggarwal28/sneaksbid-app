@@ -1,9 +1,6 @@
 {% extends './base.html' %}
  {% load static %}
 {% block content %}
-
-
-{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -24,7 +21,7 @@
         min-height: 100vh; /* Minimum height to fill the viewport */
     }
 
-    .header, .footer {
+    .header {
         background-color: #f8f8f8;
         padding: 20px;
         text-align: center;
@@ -42,7 +39,9 @@
         position: relative; /* Position relative to its normal position */
         z-index: 1; /* Ensure it's above the background but below modal/pop-up elements */
     }
-
+#footer-main {
+    width: 100%;
+}
     .user-card {
         padding: 20px;
         text-align: center;
@@ -178,8 +177,6 @@
             </form>
         </div>
     </div>
-
-    <!-- Footer -->
 
    </div>
 </body>
