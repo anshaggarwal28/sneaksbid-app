@@ -98,7 +98,7 @@
                   <form method="post" action="">
                       {% csrf_token %}
                       {{ form.as_p }}
-                      <button type="submit">Place Bid</button>
+                      <button type="submit" class="btn">Place Bid</button>
                   </form>
               </div>
           {% else %}
@@ -112,7 +112,7 @@
                           {% if bid.user == request.user %}
 
                              <div class="button-container">
-                        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+{#                        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>#}
 
                              <form id="addToCartForm" action="{% url 'add_to_cart' item.id %}" method="post">
                     {% csrf_token %}
