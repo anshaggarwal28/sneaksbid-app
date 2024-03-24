@@ -437,10 +437,86 @@ def view_cart(request):
     context = {'items': items, 'total_winning_bid': total_winning_bid, 'logged_in_user_name': logged_in_user_name}
     return render(request, 'sneaksbid/cart.html', context)
 
+# @login_required
+# def process_payment(request):
+#     total_winning_bid = request.session.get('total_winning_bid', 0)
+
+#     if total_winning_bid == 0:
+#         messages.error(request, "You do not have any winning bids to pay for.")
+#         return redirect('home')
+
+#     if request.method == 'POST':
+#         form = PaymentForm(request.POST)
+#         if form.is_valid():
+#             token = request.POST.get('stripeToken')
+#             try:
+#                 charge = stripe.Charge.create(
+#                     amount=int(total_winning_bid * 100),  # Convert dollars to cents
+#                     currency='usd',
+#                     source=token,
+#                 )
+#                 Payment2.objects.create(
+#                     user=request.user,
+#                     amount=total_winning_bid,
+#                     stripe_charge_id=charge.id,
+#                 )
+#                 messages.success(request, 'Payment successful!')
+#                 # No need to update the winning_bid since we are not using it anymore
+#                 return render(request, 'sneaksbid/payment_success.html')
+#             except stripe.error.StripeError:
+#                 messages.error(request, 'Payment error!')
+#     else:
+#         form = PaymentForm()
+
+#     return render(request, 'sneaksbid/payment.html', {
+#         'form': form,
+#         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
+#         'total_winning_bid': total_winning_bid
+#     })
+
+# @login_required
+# def process_payment(request):
+#     total_winning_bid = request.session.get('total_winning_bid', 0)
+
+#     if total_winning_bid == 0:
+#         messages.error(request, "You do not have any winning bids to pay for.")
+#         return redirect('home')
+
+#     if request.method == 'POST':
+#         form = PaymentForm(request.POST)
+#         if form.is_valid():
+#             token = request.POST.get('stripeToken')
+#             try:
+#                 charge = stripe.Charge.create(
+#                     amount=int(total_winning_bid * 100),  # Convert dollars to cents
+#                     currency='usd',
+#                     source=token,
+#                 )
+#                 Payment2.objects.create(
+#                     user=request.user,
+#                     amount=total_winning_bid,
+#                     stripe_charge_id=charge.id,
+#                 )
+#                 messages.success(request, 'Payment successful!')
+#                 # Redirect to payment_success.html upon successful payment
+#                 return redirect('payment_success')
+#             except stripe.error.StripeError:
+#                 messages.error(request, 'Payment error!')
+#     else:
+#         form = PaymentForm()
+
+#     return render(request, 'sneaksbid/payment.html', {
+#         'form': form,
+#         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
+#         'total_winning_bid': total_winning_bid
+#     })
+
 @login_required
 def process_payment(request):
+    # Retrieve the user's winning bid amount
     total_winning_bid = request.session.get('total_winning_bid', 0)
 
+    #total_winning_bid = Bid.objects.filter(user=request.user, is_winner=True).first()
     if total_winning_bid == 0:
         messages.error(request, "You do not have any winning bids to pay for.")
         return redirect('home')
@@ -461,7 +537,9 @@ def process_payment(request):
                     stripe_charge_id=charge.id,
                 )
                 messages.success(request, 'Payment successful!')
-                # No need to update the winning_bid since we are not using it anymore
+                # Update the winning bid to indicate payment has been made, if necessary
+                # total_winning_bid.paid = True  # Assuming you have a 'paid' field on your Bid model
+                # total_winning_bid.save()
                 return redirect('payment_success')
             except stripe.error.StripeError:
                 messages.error(request, 'Payment error!')
@@ -471,5 +549,31 @@ def process_payment(request):
     return render(request, 'sneaksbid/payment.html', {
         'form': form,
         'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLIC_KEY,
-        'total_winning_bid': total_winning_bid
-    })
+        'winning_bid_amount': total_winning_bid,  
+        })
+
+def payment_success(request):
+    cart_items = request.session.get('cart_items', [])
+    total_winning_bid = request.session.get('total_winning_bid', 0)
+
+    if total_winning_bid == 0:
+        messages.error(request, "You do not have any winning bids to pay for.")
+        return redirect('home')
+
+    user = request.user
+    purchased_items = []
+
+    # Fetch details of the purchased items
+    for cart_item in cart_items:
+        item = get_object_or_404(Item, pk=cart_item['item_id'])
+        winning_bid = item.bids.filter(is_winner=True).first()
+        if winning_bid:
+            purchased_items.append({'item': item, 'winning_bid': winning_bid})
+
+    context = {
+        'user': user,
+        'total_winning_bid': total_winning_bid,
+        'purchased_items': purchased_items,
+    }
+
+    return render(request, 'sneaksbid/payment_success.html', context)

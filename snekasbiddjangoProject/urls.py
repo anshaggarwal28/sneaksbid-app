@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from sneaksbid import views
-from sneaksbid.views import HomeView, shop, ShoeCreateView,CheckoutView, add_to_cart,view_cart
+from sneaksbid.views import HomeView, shop, ShoeCreateView,CheckoutView, add_to_cart,view_cart,payment_success
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
@@ -43,6 +43,8 @@ urlpatterns = [
     path('view-cart/', views.view_cart, name='view_cart'),
   #  path('remove/<int:cart_item_id>/', views.remove_from_cart, name='remove_cart'),
     path('payment/<total_winning_bid>/', views.process_payment, name='process_payment'),
+    
+    path('payment_success/', views.payment_success, name='payment_success'),
 
 ]
 if settings.DEBUG:
