@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+{% extends './base.html' %}
+ {% load static %}
+{% block content %}
+
 
 {% load static %}
 <html lang="en">
@@ -104,9 +107,9 @@
 </style>
 </head>
 <body>
-    <div class="header">
-        <span>Profile</span>
-    </div>
+{#    <div class="header">#}
+{#        <span>Profile</span>#}
+{#    </div>#}
 
     <div class="container">
         <!-- Display Messages -->
@@ -125,7 +128,7 @@
                 {% if request.user.profile.images %}
                     <img src="{{ request.user.profile.images.url }}" alt="Profile Image" class="avatar">
                 {% else %}
-                    <img src="{{ default_image_url }}" alt="Default Image" class="avatar">
+                    <img src="{% static 'images/icons/di.png' %}" alt="Default Image" class="avatar">
                 {% endif %}
             </div>
             <div class="user-info">
@@ -176,9 +179,8 @@
     </div>
 
     <!-- Footer -->
-   <div class="footer">
-     <a href="{% url 'home' %}">Return</a>
 
    </div>
 </body>
 </html>
+{% endblock %}
