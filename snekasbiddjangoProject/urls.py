@@ -49,6 +49,8 @@ urlpatterns = [
   #  path('remove/<int:cart_item_id>/', views.remove_from_cart, name='remove_cart'),
     path('payment/<total_winning_bid>/', views.process_payment, name='process_payment'),
     path('contact/', views.contactus, name='contact'),
+
+    path('payment_success/', views.payment_success, name='payment_success'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
