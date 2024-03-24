@@ -75,25 +75,52 @@
 	text-align: center;
 }
 
+input[type='text'], input[type='number'], input[type='password']{
+    border: 1px solid #cecece !important;
+    margin-bottom: 5px;
+}
+
 .search-input {
 	padding: 8px;
 	border-color:   #4CAF50;
 	border-radius: 4px;
 	margin-right: 5px;
 	margin-top: 10px;
+    border: 1px solid #cecece !important;
 }
 
 .search-button {
 	padding: 8px 16px;
-	border: none;
+	/* border: none; */
 	background-color: #4CAF50;
+    border: 1px solid #4CAF50;
 	color: white;
+    border-radius: 0 4px 4px 0;
 	border-radius: 4px;
 	cursor: pointer;
+    margin-left: -5px;
 }
 
 .search-button:hover {
 	background-color: #45a049;
+}
+
+#brand_filter_button,
+#search_price_button{
+    padding: 8px 16px;
+    border: none;
+    background-color: #4CAF50;
+    border: 1px solid #4CAF50;
+    color: white;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+#id_brand{
+    padding: 8px;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    width: 40%;
 }
 </style>
 
@@ -107,12 +134,25 @@
 		</p>
 	</section>
 
-	<!-- Search Bar -->
-<form action="{% url 'search_sneakers' %}" method="GET" class="search-form">
-    <input type="text" name="query" placeholder="Search shoes by name" class="search-input">
-    <button type="submit" class="search-button">Search</button>
-</form>
-	<!-- Display Sneakers -->
+    <div class="sneaker-images mt-3 mb-5">
+	    <!-- Search Bar -->
+        <form action="{% url 'search_sneakers' %}" method="GET" class="search-form" style="height: fit-content">
+            <input type="text" name="query" placeholder="Search shoes by name" class="search-input">
+            <button type="submit" class="search-button">Search</button>
+        </form>
+	    <!-- Display Sneakers -->
+
+        <!-- Brand Filter Form -->
+        <form method="GET" class="w-25 border rounded p-3" style="height: fit-content">
+            {{ form2.as_p }}
+            <input type="submit" id="brand_filter_button" value="Filter By Brand">
+        </form>
+        <!-- Price Range Form -->
+        <form method="GET" class="w-25 border rounded p-3" style="height: fit-content">
+            {{ form1 }}
+            <input type="submit" id="search_price_button" value="Select Price">
+        </form>
+    </div>
 	
 	<!-- Sneaker Images -->
 <div class="sneaker-images">

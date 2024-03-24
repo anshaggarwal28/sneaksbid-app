@@ -10,10 +10,24 @@ from django.contrib.auth.models import User
 
 
 # Create your models here.
+class Brand(models.Model):
+    # brand_lists = [
+    #     ('Nike', 'N'),
+    #     ('Adidas', 'A'),
+    #     ('Puma', 'P'),
+    #     ('Reebok', 'R'),
+    # ]
+    # name = models.TextField(max_length=100, choices=brand_lists, default='Nike')
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Item(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    brand_name = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, blank=True)
     post_time = models.DateTimeField(default=timezone.now)
     auction_duration = models.DurationField(default=timezone.timedelta(days=1))  # Auction lasts for 1 day
     image = models.ImageField(upload_to='items/')
