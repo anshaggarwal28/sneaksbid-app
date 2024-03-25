@@ -169,4 +169,39 @@ input[type='text'], input[type='number'], input[type='password']{
             <p>No search results found.</p>
         {% endif %}
     </div>
+        <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timers = document.querySelectorAll('.auction-timer');
+
+    timers.forEach(function(timer) {
+        const endTime = new Date(timer.getAttribute('data-end-time')).getTime();
+        const durationSeconds = parseInt(timer.getAttribute('data-duration-seconds'), 10);
+        const auctionEndTime = endTime + (durationSeconds * 1000);
+
+        const updateCountdown = () => {
+            const now = new Date().getTime();
+            const timeLeft = auctionEndTime - now;
+
+            if (timeLeft < 0) {
+                timer.innerHTML = "Auction ended";
+                clearInterval(interval); // Stop updating when the auction ends
+                return;
+            }
+
+            // Calculate days, hours, minutes, and seconds
+            let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            // Update the timer's content
+            timer.innerHTML = `Auction ends in approximately ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        };
+
+        // Update the countdown every second
+        updateCountdown(); // Update immediately to avoid delay
+        const interval = setInterval(updateCountdown, 1000);
+    });
+});
+</script>
 {% endblock content %}
