@@ -1,0 +1,2 @@
+web: gunicorn testapp.wsgi --log-file -
+worker: celery -A testapp worker --loglevel=info
