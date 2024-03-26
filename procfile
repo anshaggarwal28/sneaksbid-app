@@ -1,3 +1,2 @@
-web: gunicorn sneaksbid.wsgi:application --bind 0.0.0.0:$PORT
-web: gunicorn sneaksbid.wsgi --log-file -
-worker: celery -A sneaksbid worker --loglevel=info
+web: gunicorn snekasbiddjangoProject.wsgi:application --bind 0.0.0.0:$PORT
+worker: celery -A snekasbiddjangoProject worker --loglevel=info
